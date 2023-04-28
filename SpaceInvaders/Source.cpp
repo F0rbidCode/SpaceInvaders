@@ -6,14 +6,16 @@
 using namespace std;
 
 struct Actor {
-	Vector2 worldPosition;
-	Texture2D texture;
-	Image image;
+	Vector2 worldPosition; //used to store world position
+	Texture2D texture; // used to store texture
+	Image image; // used to store image
+	bool isDead = false; //used to determin if actor is still alive
+	float scale; //used to set the scale of the actor
 
 public:
 	void Draw()
 	{
-		DrawTextureEx(texture, worldPosition, 0, 1, WHITE);
+		DrawTextureEx(texture, worldPosition, 0, scale, WHITE);
 	}
 };
 
@@ -22,29 +24,54 @@ void main()
 	/////////////////////////////////////
 	////// Initialization
 	/////////////////////////////////////
-	bool game = true; //set game to true to start gameloop
+
+			bool game = true; //set game to true to start gameloop
+
+			int screenWidth = 1920; // set the width of the screen
+			int screenHeight = 1080; // set the height of the screen
+
+		SetTargetFPS(60);
+
+		//initialise variables used to calculate delta time
+			float currentTime = GetTime();
+			float previousTime;
+			float deltaTime;
+
+		InitWindow(screenWidth, screenHeight, "Space Invaders");
+
+		///Initialise player
+			Actor player; //initialise player 
+			player.image = LoadImage("playerShip2_blue.png");
+			player.texture = LoadTextureFromImage(player.image);
+			//set x and y positions of the player
+			player.worldPosition.x = (GetScreenWidth() / 2);
+			player.worldPosition.y = (GetScreenHeight() - (player.texture.height * 2));
+			player.scale = 1;
+
+			const float PLAYER_SPEED = 200.00; //set the speed of the player
+		
+
+		///Initialise Player SHot
+			Actor playerShot; //initialise a bullet for the player
+			const float SHOT_SPEED = 400; //set the speeds of shots
+			bool hasShot = false; //initialise a bool to determin if the player has shot
+			playerShot.image = LoadImage("laserBlue01.png");
+			playerShot.texture = LoadTextureFromImage(playerShot.image);
+
+		////Initialise Enemies
+			const float ENEMY_SPEED = 100.00;
+			bool goRight = true; //used to reverse the direction of travel
+
+			Actor enemy;
+			enemy.image = LoadImage("enemyBlack2.png");
+			enemy.texture = LoadTextureFromImage(enemy.image);
+			enemy.scale = 0.5;
+
+			//set x and y positions for the enemy
+			enemy.worldPosition.x = 0 + (enemy.texture.width);
+			enemy.worldPosition.y = 0 + (enemy.texture.height);
+
 	
-	int screenWidth = 1920; // set the width of the screen
-	int screenHeight = 1080; // set the height of the screen
-
-	SetTargetFPS(60);
-
-	//initialise variables used to calculate delta time
-	float currentTime = GetTime();
-	float previousTime;
-	float deltaTime;
-	
-	InitWindow(screenWidth, screenHeight, "Space Invaders");
-
-	Actor player; //initialise player 
-	player.image = LoadImage("playerShip2_blue.png");
-	player.texture = LoadTextureFromImage(player.image);
-	//set x y and z positions of the player
-	player.worldPosition.x = (GetScreenWidth() / 2);
-	player.worldPosition.y = (GetScreenHeight() - (player.texture.height * 2));
-
-	const float PLAYER_SPEED = 100.00; //set the speed of the player
-
 	
 	///////////////////////////////////////////////
 	////// Game Loop
@@ -68,7 +95,46 @@ void main()
 
 		ClearBackground(BLACK);
 
-		player.Draw();
+		if (!player.isDead)
+		{
+			player.Draw();
+		}		
+		
+		if (hasShot) //check if the player has shot
+		{
+			playerShot.worldPosition.y -= (deltaTime * SHOT_SPEED); //continue to move the shot up the screen every frame
+			playerShot.Draw();
+
+			if (playerShot.worldPosition.y <= 0) //if the players shot goes past the top of the screen
+			{
+				hasShot = false; //set has shot to false
+			}
+		}
+
+		if (!enemy.isDead)
+		{
+			if (goRight)
+			{
+				enemy.worldPosition.x += (deltaTime * ENEMY_SPEED);
+
+				if (enemy.worldPosition.x + (enemy.texture.width / 2) >= GetScreenWidth())
+				{
+					enemy.worldPosition.y += ((deltaTime * ENEMY_SPEED) * 2);
+					goRight = false;
+				}
+			}
+			if (!goRight)
+			{
+				enemy.worldPosition.x -= (deltaTime * ENEMY_SPEED);
+				if (enemy.worldPosition.x <= 0)
+				{
+					enemy.worldPosition.y += ((deltaTime * ENEMY_SPEED) * 2);
+					goRight = true;
+				}
+			}
+
+			enemy.Draw();
+		}
 		
 		EndDrawing();
 		
@@ -77,14 +143,39 @@ void main()
 		/////////////////////////////////////////////////////
 
 		if (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D))
-		{
-			player.worldPosition.x += (deltaTime * PLAYER_SPEED);
+		{			
+			if (player.worldPosition.x + player.texture.width >= GetScreenWidth())
+			{
+
+			}
+			else
+			{
+				player.worldPosition.x += (deltaTime * PLAYER_SPEED);
+			}
 		}
 		if (IsKeyDown (KEY_LEFT) || IsKeyDown(KEY_A))
 		{
-			player.worldPosition.x -= (deltaTime * PLAYER_SPEED);
+			if (player.worldPosition.x <= 0)
+			{
+
+			}
+			else
+			{
+				player.worldPosition.x -= (deltaTime * PLAYER_SPEED);
+			}
+			
 		}
 
+		if (IsKeyDown(KEY_SPACE))
+		{
+			if (!hasShot)
+			{
+				hasShot = true;
+				playerShot.worldPosition.x = player.worldPosition.x + (player.texture.width / 2) - (playerShot.texture.width / 2);
+				playerShot.worldPosition.y = player.worldPosition.y - (playerShot.texture.height / 2);
+			}
+			
+		}
 
 		if (IsKeyPressed(KEY_ESCAPE))///if escape key is pressed
 		{
