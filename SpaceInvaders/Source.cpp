@@ -1,6 +1,7 @@
 #include <iostream>
 #include <raylib.h>
 #include "raymath.h"
+#include "AABB.h"
 
 
 using namespace std;
@@ -48,6 +49,8 @@ void main()
 			player.worldPosition.y = (GetScreenHeight() - (player.texture.height * 2));
 			player.scale = 1;
 
+			AABB playerBox;
+			Vector2 playerMax; //used to store the lower right position of the player sprite			
 			const float PLAYER_SPEED = 200.00; //set the speed of the player
 		
 
@@ -57,6 +60,8 @@ void main()
 			bool hasShot = false; //initialise a bool to determin if the player has shot
 			playerShot.image = LoadImage("laserBlue01.png");
 			playerShot.texture = LoadTextureFromImage(playerShot.image);
+			playerShot.scale = 0.5;
+			
 
 		////Initialise Enemies
 			const float ENEMY_SPEED = 100.00;
@@ -66,6 +71,9 @@ void main()
 			enemy.image = LoadImage("enemyBlack2.png");
 			enemy.texture = LoadTextureFromImage(enemy.image);
 			enemy.scale = 0.5;
+			AABB enemyBox; //create an AABB for enemy collisions
+			Vector2 enemyMax; //used to determin lower right corner of enemy sprite
+			
 
 			//set x and y positions for the enemy
 			enemy.worldPosition.x = 0 + (enemy.texture.width);
@@ -87,6 +95,19 @@ void main()
 		currentTime = GetTime();
 		deltaTime = (currentTime - previousTime);
 
+		
+		//calculate the new x and y position of the lower right corner of player sprite
+		playerMax.x = player.worldPosition.x + (player.texture.width * player.scale);
+		playerMax.y = player.worldPosition.y + (player.texture.height * player.scale);
+
+		//calculate the new x and y positios of the lower right corner of the enemy
+		enemyMax.x = enemy.worldPosition.x + (enemy.texture.width * enemy.scale);
+		enemyMax.y = enemy.worldPosition.y + (enemy.texture.height * enemy.scale);
+
+		//refit AABBs
+		playerBox.Fit(player.worldPosition, playerMax);
+		enemyBox.Fit(enemy.worldPosition, enemyMax);
+
 
 		/////////////////////////////////////////////////
 		///// Draw
@@ -97,6 +118,7 @@ void main()
 
 		if (!player.isDead)
 		{
+			playerBox.DebugBox(RED);
 			player.Draw();
 		}		
 		
@@ -108,6 +130,11 @@ void main()
 			if (playerShot.worldPosition.y <= 0) //if the players shot goes past the top of the screen
 			{
 				hasShot = false; //set has shot to false
+			}
+
+			if (enemyBox.Overlaps(playerShot.worldPosition))
+			{
+				enemy.isDead = true;
 			}
 		}
 
@@ -133,6 +160,7 @@ void main()
 				}
 			}
 
+			enemyBox.DebugBox(GREEN);
 			enemy.Draw();
 		}
 		
