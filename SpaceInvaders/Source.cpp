@@ -15,6 +15,7 @@ struct Actor {
 	Image image; // used to store image
 	bool isDead = false; //used to determin if actor is still alive
 	float scale; //used to set the scale of the actor
+	//int count = 0; //used to determing the length of time the explosion stays on the screen
 
 public:
 	void Draw()
@@ -33,6 +34,8 @@ void main()
 
 			int screenWidth = 1920; // set the width of the screen
 			int screenHeight = 1080; // set the height of the screen
+
+			InitAudioDevice();
 
 		SetTargetFPS(60);
 
@@ -64,6 +67,10 @@ void main()
 			playerShot.image = LoadImage("laserBlue01.png");
 			playerShot.texture = LoadTextureFromImage(playerShot.image);
 			playerShot.scale = 0.5;
+
+
+		//initialise variables used for player uppgrades
+			bool shootThrough = false;
 			
 
 		////Initialise Enemies
@@ -94,6 +101,15 @@ void main()
 			vector<vector<Actor>> enemies(EN_ROWS,vector<Actor>(EN_COLS));
 			int lastX = 0;
 			int lastY = 0;
+
+			//create an actor to display explosion
+			Actor explode;
+			explode.image = LoadImage("laserRed08.png");
+			explode.texture = LoadTextureFromImage(explode.image);
+			int count = 0;
+			const int LENGTH = 15; //amount of time the explode will be displayed			
+			explode.scale = 0.5;
+			
 			
 			for (int i = 0; i < EN_ROWS; i++)
 			{
@@ -121,7 +137,11 @@ void main()
 			//enemy.worldPosition.x = 0 + (enemy.texture.width);
 			//enemy.worldPosition.y = 0 + (enemy.texture.height);
 
-	
+	////////////////////////////////////////////////////////////////
+	///SOUNDS
+	////////////////////////////////////////////////////////////////
+			Sound shootfx = LoadSound("sfx_laser2.ogg");
+			Sound boom = LoadSound("mixkit-pixel-chiptune-explosion-1692.wav");
 	
 	///////////////////////////////////////////////
 	////// Game Loop
@@ -197,7 +217,16 @@ void main()
 				{
 					if (enemies[i][j].Box.Overlaps(playerShot.worldPosition))
 					{
+						explode.worldPosition.x = enemies[i][j].worldPosition.x + (enemies[i][j].texture.width * enemies[i][j].scale) / 2;
+						explode.worldPosition.y = enemies[i][j].worldPosition.y + (enemies[i][j].texture.height * enemies[i][j].scale) / 2;
+						explode.isDead = false;
 						enemies[i][j].isDead = true;
+						enemies[i][j].worldPosition.x = -100;
+						PlaySound(boom);
+						if (!shootThrough)
+						{
+							hasShot = false;
+						}
 					}
 				}
 			}
@@ -247,6 +276,18 @@ void main()
 			}
 		}
 
+		
+		if (!explode.isDead)
+		{
+			count ++; //calculate the amount of time the explosion has been on screen
+			if (count > LENGTH) //if the explosion has been on for longert then LENGTH
+			{
+				explode.isDead = true; //set is dead to true so explosion will stop drawing
+				count = 0; // reset counter
+			}
+			explode.Draw();
+		}
+
 		//if (!enemy.isDead)
 		//{
 		//	if (goRight)
@@ -271,7 +312,7 @@ void main()
 
 		//	enemy.Box.DebugBox(GREEN);
 		//	enemy.Draw();
-		//}
+		//}	
 		
 		EndDrawing();
 		
@@ -310,6 +351,7 @@ void main()
 				hasShot = true;
 				playerShot.worldPosition.x = player.worldPosition.x + (player.texture.width / 2) - (playerShot.texture.width / 2);
 				playerShot.worldPosition.y = player.worldPosition.y - (playerShot.texture.height / 2);
+				PlaySound(shootfx);
 			}
 			
 		}
