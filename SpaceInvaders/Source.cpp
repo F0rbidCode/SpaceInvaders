@@ -2,12 +2,15 @@
 #include <raylib.h>
 #include "raymath.h"
 #include "AABB.h"
+#include <vector>
 
 
 using namespace std;
 
 struct Actor {
 	Vector2 worldPosition; //used to store world position
+	Vector2 Max;
+	AABB Box; //create an AABB for enemy collisions
 	Texture2D texture; // used to store texture
 	Image image; // used to store image
 	bool isDead = false; //used to determin if actor is still alive
@@ -67,17 +70,48 @@ void main()
 			const float ENEMY_SPEED = 100.00;
 			bool goRight = true; //used to reverse the direction of travel
 
-			Actor enemy;
+			/*Actor enemy;
 			enemy.image = LoadImage("enemyBlack2.png");
 			enemy.texture = LoadTextureFromImage(enemy.image);
-			enemy.scale = 0.5;
-			AABB enemyBox; //create an AABB for enemy collisions
-			Vector2 enemyMax; //used to determin lower right corner of enemy sprite
-			
+			enemy.scale = 0.5;*/
+			//AABB enemyBox; //create an AABB for enemy collisions
+			//Vector2 enemyMax; //used to determin lower right corner of enemy sprite
 
-			//set x and y positions for the enemy
-			enemy.worldPosition.x = 0 + (enemy.texture.width);
-			enemy.worldPosition.y = 0 + (enemy.texture.height);
+			//variables to create an array of enemies
+
+			Image image1 = LoadImage("enemyBlack2.png");
+			Texture texture1 = LoadTextureFromImage(image1);
+			const int EN_COLS = 11; //number of collums of enemies
+			const int EN_ROWS = 5; //number of rows of enemies
+			vector<vector<Actor>> enemies(EN_ROWS,vector<Actor>(EN_COLS));
+			int lastX = 0;
+			int lastY = 0;
+			
+			for (int i = 0; i < EN_ROWS; i++)
+			{
+				for (int j = 0; j < EN_COLS; j++)
+				{
+					//create the enemy
+					Actor enemy;
+					enemy.image = image1;
+					enemy.texture = LoadTextureFromImage(enemy.image);
+					enemy.scale = 0.5;
+
+					//set x and y positions for the enemy
+					enemy.worldPosition.x = lastX + (enemy.texture.width);
+					enemy.worldPosition.y = lastY + (enemy.texture.height);
+
+					lastX = enemy.worldPosition.x;
+
+					//add enemy to array
+					enemies[i][j] = enemy;
+				}
+				lastX = 0;
+				lastY = lastY + texture1.height;
+			}
+			////set x and y positions for the enemy
+			//enemy.worldPosition.x = 0 + (enemy.texture.width);
+			//enemy.worldPosition.y = 0 + (enemy.texture.height);
 
 	
 	
@@ -100,13 +134,26 @@ void main()
 		playerMax.x = player.worldPosition.x + (player.texture.width * player.scale);
 		playerMax.y = player.worldPosition.y + (player.texture.height * player.scale);
 
-		//calculate the new x and y positios of the lower right corner of the enemy
-		enemyMax.x = enemy.worldPosition.x + (enemy.texture.width * enemy.scale);
-		enemyMax.y = enemy.worldPosition.y + (enemy.texture.height * enemy.scale);
+		////calculate the new x and y positios of the lower right corner of the enemy
+		//enemy.Max.x = enemy.worldPosition.x + (enemy.texture.width * enemy.scale);
+		//enemy.Max.y = enemy.worldPosition.y + (enemy.texture.height * enemy.scale);
+
+		for (int i = 0; i < EN_ROWS; i++)
+		{
+			for (int j = 0; j < EN_COLS; j++)
+			{
+				//calculate the new x and y positios of the lower right corner of the enemy
+				enemies[i][j].Max.x = enemies[i][j].worldPosition.x + (enemies[i][j].texture.width * enemies[i][j].scale);
+				enemies[i][j].Max.y = enemies[i][j].worldPosition.y + (enemies[i][j].texture.height * enemies[i][j].scale);
+
+				//Fit enemy AABB
+				enemies[i][j].Box.Fit(enemies[i][j].worldPosition, enemies[i][j].Max);
+			}
+		}
 
 		//refit AABBs
 		playerBox.Fit(player.worldPosition, playerMax);
-		enemyBox.Fit(enemy.worldPosition, enemyMax);
+		//enemy.Box.Fit(enemy.worldPosition, enemy.Max);
 
 
 		/////////////////////////////////////////////////
@@ -132,37 +179,91 @@ void main()
 				hasShot = false; //set has shot to false
 			}
 
-			if (enemyBox.Overlaps(playerShot.worldPosition))
+			/*if (enemy.Box.Overlaps(playerShot.worldPosition))
 			{
 				enemy.isDead = true;
+			}*/
+			for (int i = 0; i < EN_ROWS; i++)
+			{
+				for (int j = 0; j < EN_COLS; j++)
+				{
+					if (enemies[i][j].Box.Overlaps(playerShot.worldPosition))
+					{
+						enemies[i][j].isDead = true;
+					}
+				}
 			}
 		}
 
-		if (!enemy.isDead)
+		for (int i = 0; i < EN_ROWS; i++)
 		{
-			if (goRight)
+			for (int j = 0; j < EN_COLS; j++)
 			{
-				enemy.worldPosition.x += (deltaTime * ENEMY_SPEED);
-
-				if (enemy.worldPosition.x + (enemy.texture.width / 2) >= GetScreenWidth())
+				if (!enemies[i][j].isDead)
 				{
-					enemy.worldPosition.y += ((deltaTime * ENEMY_SPEED) * 2);
-					goRight = false;
+					if (goRight)
+					{
+						enemies[i][j].worldPosition.x += (deltaTime * ENEMY_SPEED);
+
+						if (enemies[i][j].worldPosition.x + (enemies[i][j].texture.width / 2) >= GetScreenWidth())
+						{
+							for (int i = 0; i < EN_ROWS; i++)
+							{
+								for (int j = 0; j < EN_COLS; j++)
+								{
+									enemies[i][j].worldPosition.y += ((deltaTime * ENEMY_SPEED) * 2);
+									goRight = false;
+								}
+							}
+						}
+					}
+					if (!goRight)
+					{
+						enemies[i][j].worldPosition.x -= (deltaTime * ENEMY_SPEED);
+						if (enemies[i][j].worldPosition.x <= 0)
+						{
+							for (int i = 0; i < EN_ROWS; i++)
+							{
+								for (int j = 0; j < EN_COLS; j++)
+								{
+									enemies[i][j].worldPosition.y += ((deltaTime * ENEMY_SPEED) * 2);
+									goRight = true;
+								}
+							}
+						}
+					}
+
+					enemies[i][j].Box.DebugBox(GREEN);
+					enemies[i][j].Draw();
 				}
 			}
-			if (!goRight)
-			{
-				enemy.worldPosition.x -= (deltaTime * ENEMY_SPEED);
-				if (enemy.worldPosition.x <= 0)
-				{
-					enemy.worldPosition.y += ((deltaTime * ENEMY_SPEED) * 2);
-					goRight = true;
-				}
-			}
-
-			enemyBox.DebugBox(GREEN);
-			enemy.Draw();
 		}
+
+		//if (!enemy.isDead)
+		//{
+		//	if (goRight)
+		//	{
+		//		enemy.worldPosition.x += (deltaTime * ENEMY_SPEED);
+
+		//		if (enemy.worldPosition.x + (enemy.texture.width / 2) >= GetScreenWidth())
+		//		{
+		//			enemy.worldPosition.y += ((deltaTime * ENEMY_SPEED) * 2);
+		//			goRight = false;
+		//		}
+		//	}
+		//	if (!goRight)
+		//	{
+		//		enemy.worldPosition.x -= (deltaTime * ENEMY_SPEED);
+		//		if (enemy.worldPosition.x <= 0)
+		//		{
+		//			enemy.worldPosition.y += ((deltaTime * ENEMY_SPEED) * 2);
+		//			goRight = true;
+		//		}
+		//	}
+
+		//	enemy.Box.DebugBox(GREEN);
+		//	enemy.Draw();
+		//}
 		
 		EndDrawing();
 		
