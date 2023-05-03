@@ -70,6 +70,7 @@ void main()
 			const float ENEMY_SPEED = 100.00;
 			bool goRight = true; //used to reverse the direction of travel
 
+			/////test enemy
 			/*Actor enemy;
 			enemy.image = LoadImage("enemyBlack2.png");
 			enemy.texture = LoadTextureFromImage(enemy.image);
@@ -77,8 +78,15 @@ void main()
 			//AABB enemyBox; //create an AABB for enemy collisions
 			//Vector2 enemyMax; //used to determin lower right corner of enemy sprite
 
-			//variables to create an array of enemies
+			//create an array of imiges to load for the enemies
+			vector<Image> images(5);
+			images[0] = LoadImage("enemyBlack1.png");
+			images[1] = LoadImage("enemyBlack2.png");
+			images[2] = LoadImage("enemyBlack3.png");
+			images[3] = LoadImage("enemyBlack4.png");
+			images[4] = LoadImage("enemyBlack5.png");
 
+			//variables to create an array of enemies
 			Image image1 = LoadImage("enemyBlack2.png");
 			Texture texture1 = LoadTextureFromImage(image1);
 			const int EN_COLS = 11; //number of collums of enemies
@@ -93,13 +101,13 @@ void main()
 				{
 					//create the enemy
 					Actor enemy;
-					enemy.image = image1;
+					enemy.image = images[i];
 					enemy.texture = LoadTextureFromImage(enemy.image);
 					enemy.scale = 0.5;
 
 					//set x and y positions for the enemy
-					enemy.worldPosition.x = lastX + (enemy.texture.width);
-					enemy.worldPosition.y = lastY + (enemy.texture.height);
+					enemy.worldPosition.x = lastX + (texture1.width);
+					enemy.worldPosition.y = lastY + (texture1.height);
 
 					lastX = enemy.worldPosition.x;
 
@@ -165,7 +173,7 @@ void main()
 
 		if (!player.isDead)
 		{
-			playerBox.DebugBox(RED);
+			//playerBox.DebugBox(RED);
 			player.Draw();
 		}		
 		
@@ -233,7 +241,7 @@ void main()
 						}
 					}
 
-					enemies[i][j].Box.DebugBox(GREEN);
+					//enemies[i][j].Box.DebugBox(GREEN);
 					enemies[i][j].Draw();
 				}
 			}
