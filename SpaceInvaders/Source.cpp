@@ -44,7 +44,7 @@ void main()
 			player.image = LoadImage("playerShip2_blue.png");
 			player.texture = LoadTextureFromImage(player.image);
 			//set x and y positions of the player
-			player.worldPosition.x = (GetScreenWidth() / 2);
+			player.worldPosition.x = (GetScreenWidth() / 2) - (player.texture.width / 2);
 			player.worldPosition.y = (GetScreenHeight() - (player.texture.height * 2));
 			player.scale = 1;
 
@@ -142,21 +142,60 @@ void main()
 			
 			const int B_LENGTH = 20; //the length pf each barrier
 			const int B_HEIGHT = 10; //the height of each barrier
-			const int START_X_1 = (GetScreenWidth() * 0.25) - (B_LENGTH / 2); //set the starting X oint for the first barrier
-			const int START_Y = GetScreenHeight() * 0.75; //set the Y point for all barriers
+			const int START_X_1 = (GetScreenWidth() * 0.25f) - ((B_LENGTH * Barriers::SIZE) / 2); //set the starting X point for the first barrier
+			const int START_X_2 = (GetScreenWidth() * 0.5f) + ((B_LENGTH * Barriers::SIZE) / 2); //set the starting x point for the second barrier
+			const int START_X_3 = (GetScreenWidth() * 0.75f) + ((B_LENGTH * Barriers::SIZE) / 2); //set the starting x point for the third barrier
+			const int START_Y = GetScreenHeight() * 0.75f; //set the Y point for all barriers
 
 			int nextX = START_X_1; //used to calculate where to put the next peice on the x
 			int nextY = START_Y; //used to calculate where to put the next peice on the y
 			vector<vector<Barriers>> barrier1(B_HEIGHT, vector<Barriers>(B_LENGTH));//create a vector to store the first barrier
+			vector<vector<Barriers>> barrier2(B_HEIGHT, vector<Barriers>(B_LENGTH));//create a vector to store the second barrier
+			vector<vector<Barriers>> barrier3(B_HEIGHT, vector<Barriers>(B_LENGTH));//create a vector to store the third barrier
+			////////////////////////////////////////
+			////Set up Barrier 1
+			////////////////////////////////////////
 			for (int i = 0; i < B_HEIGHT; i++)
 			{
 				for (int j = 0; j < B_LENGTH; j++)
 				{
 					barrier1[i][j].MakeBarriers(nextX, nextY);
-					nextX -= barrier1[i][j].SIZE;
+					nextX -= Barriers::SIZE;
 				}
 				nextX = START_X_1;
-				nextY -= barrier1[i][0].SIZE;
+				nextY -= Barriers::SIZE;
+			}
+
+			///////////////////////////////////////////
+			///////Set Up Barrier 2
+			///////////////////////////////////////////
+			nextX = START_X_2;
+			nextY = START_Y;
+			for (int i = 0; i < B_HEIGHT; i++)
+			{
+				for (int j = 0; j < B_LENGTH; j++)
+				{
+					barrier2[i][j].MakeBarriers(nextX, nextY);
+					nextX -= Barriers::SIZE;
+				}
+				nextX = START_X_2;
+				nextY -= Barriers::SIZE;
+			}
+
+			/////////////////////////////////////////////
+			//////Set Up Barrier 3
+			/////////////////////////////////////////////
+			nextX = START_X_3;
+			nextY = START_Y;
+			for (int i = 0; i < B_HEIGHT; i++)
+			{
+				for (int j = 0; j < B_LENGTH; j++)
+				{
+					barrier3[i][j].MakeBarriers(nextX, nextY);
+					nextX -= Barriers::SIZE;
+				}
+				nextX = START_X_3;
+				nextY -= Barriers::SIZE;
 			}
 	
 
@@ -259,6 +298,10 @@ void main()
 				}
 			}
 
+			/////////////////////////////////////////
+			//////////Collisions For Barriers
+			/////////////////////////////////////////
+			//Barrier 1 collisions
 			for (int i = 0; i < B_HEIGHT; i++)
 			{
 				for (int j = 0; j < B_LENGTH; j++)
@@ -270,6 +313,46 @@ void main()
 							PlaySound(boom);
 							barrier1[i][j].isDead = true;
 							barrier1[i][j].worldPosition.x = -100;
+							if (!shootThrough)
+							{
+								hasShot = false;
+							}
+						}
+					}
+				}
+			}
+			//barrier 2 collision
+			for (int i = 0; i < B_HEIGHT; i++)
+			{
+				for (int j = 0; j < B_LENGTH; j++)
+				{
+					if (!barrier2[i][j].isDead)
+					{
+						if (barrier2[i][j].Box.Overlaps(playerShot.worldPosition))
+						{
+							PlaySound(boom);
+							barrier2[i][j].isDead = true;
+							barrier2[i][j].worldPosition.x = -100;
+							if (!shootThrough)
+							{
+								hasShot = false;
+							}
+						}
+					}
+				}
+			}
+			//barreir 3 collision
+			for (int i = 0; i < B_HEIGHT; i++)
+			{
+				for (int j = 0; j < B_LENGTH; j++)
+				{
+					if (!barrier3[i][j].isDead)
+					{
+						if (barrier3[i][j].Box.Overlaps(playerShot.worldPosition))
+						{
+							PlaySound(boom);
+							barrier3[i][j].isDead = true;
+							barrier3[i][j].worldPosition.x = -100;
 							if (!shootThrough)
 							{
 								hasShot = false;
@@ -366,6 +449,10 @@ void main()
 		//	enemy.Draw();
 		//}	
 
+		///////////////////////////////////////////
+		//////Draw Barriers
+		///////////////////////////////////////////
+		////draw Barrier 1
 		for (int i = 0; i < B_HEIGHT; i++)
 		{
 			for (int j = 0; j < B_LENGTH; j++)
@@ -373,6 +460,28 @@ void main()
 				if (!barrier1[i][j].isDead)
 				{
 					barrier1[i][j].DrawBarriers();
+				}
+			}
+		}
+		////draw barrier 2
+		for (int i = 0; i < B_HEIGHT; i++)
+		{
+			for (int j = 0; j < B_LENGTH; j++)
+			{
+				if (!barrier2[i][j].isDead)
+				{
+					barrier2[i][j].DrawBarriers();
+				}
+			}
+		}
+		///draw barrier 3
+		for (int i = 0; i < B_HEIGHT; i++)
+		{
+			for (int j = 0; j < B_LENGTH; j++)
+			{
+				if (!barrier3[i][j].isDead)
+				{
+					barrier3[i][j].DrawBarriers();
 				}
 			}
 		}
