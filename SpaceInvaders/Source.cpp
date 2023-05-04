@@ -24,6 +24,10 @@ public:
 	}
 };
 
+//prototype for creating the barriers
+void Barriers();
+void DrawBarriers(Actor barrier);
+
 void main()
 {
 	/////////////////////////////////////
@@ -144,6 +148,16 @@ void main()
 	////////////////////////////////////////////////////////////////
 			Sound shootfx = LoadSound("sfx_laser2.ogg");
 			Sound boom = LoadSound("mixkit-pixel-chiptune-explosion-1692.wav");
+
+    /////////////////////////////////////////////////////////////////
+    /// BARRIERS
+	//////////////////////////////
+			Actor barrier;
+
+			barrier.scale = 1;
+			barrier.worldPosition.x = GetScreenWidth() /2;
+			barrier.worldPosition.y = GetScreenHeight() * .75;
+			barrier.isDead = false;
 	
 	///////////////////////////////////////////////
 	////// Game Loop
@@ -316,7 +330,7 @@ void main()
 		//	enemy.Box.DebugBox(GREEN);
 		//	enemy.Draw();
 		//}	
-		
+		DrawBarriers(barrier);
 		DrawText(TextFormat("Scrap: %05i", scrap), 10, 10, 20, WHITE);
 
 		EndDrawing();
@@ -370,3 +384,4 @@ void main()
 	}
 	//system("pause");
 }
+
