@@ -31,6 +31,8 @@ void main()
 	/////////////////////////////////////
 
 			bool game = true; //set game to true to start gameloop
+			int scrap = 0; //scrap is used to represent score and as a currency for upgrades
+			int scrapPerKill = 10; //used to set the scrap earnt per kill
 
 			int screenWidth = 1920; // set the width of the screen
 			int screenHeight = 1080; // set the height of the screen
@@ -223,6 +225,7 @@ void main()
 						enemies[i][j].isDead = true;
 						enemies[i][j].worldPosition.x = -100;
 						PlaySound(boom);
+						scrap += scrapPerKill;
 						if (!shootThrough)
 						{
 							hasShot = false;
@@ -314,6 +317,8 @@ void main()
 		//	enemy.Draw();
 		//}	
 		
+		DrawText(TextFormat("Scrap: %05i", scrap), 10, 10, 20, WHITE);
+
 		EndDrawing();
 		
 		/////////////////////////////////////////////////////
