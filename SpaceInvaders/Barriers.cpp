@@ -1,11 +1,14 @@
 #include "Barriers.h"
 
-void Barriers :: MakeBarriers()
+void Barriers :: MakeBarriers(int x, int y)
 {
-	worldPosition.x = GetScreenWidth() /2;
-	worldPosition.y = GetScreenHeight() * .75;
+	worldPosition.x = x;
+	worldPosition.y = y;
 	isDead = false;
-	
+	Max.x = x + SIZE;
+	Max.y = y + SIZE;
+
+	Box.Fit(worldPosition, Max);
 }
 
  void Barriers :: DrawBarriers()

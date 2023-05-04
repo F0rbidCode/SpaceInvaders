@@ -139,17 +139,26 @@ void main()
     /////////////////////////////////////////////////////////////////
     /// BARRIERS
 	//////////////////////////////
-			/*Actor barrier;
+			
+			const int B_LENGTH = 20; //the length pf each barrier
+			const int B_HEIGHT = 10; //the height of each barrier
+			const int START_X_1 = (GetScreenWidth() * 0.25) - (B_LENGTH / 2); //set the starting X oint for the first barrier
+			const int START_Y = GetScreenHeight() * 0.75; //set the Y point for all barriers
 
-			barrier.scale = 1;
-			barrier.worldPosition.x = GetScreenWidth() /2;
-			barrier.worldPosition.y = GetScreenHeight() * .75;
-			barrier.isDead = false;
-	*/
-			Barriers barrier;
-			barrier.MakeBarriers();
-			/*barrier.worldPosition.x = GetScreenWidth() / 2;;
-			barrier.worldPosition.y = GetScreenHeight() * .75;*/
+			int nextX = START_X_1; //used to calculate where to put the next peice on the x
+			int nextY = START_Y; //used to calculate where to put the next peice on the y
+			vector<vector<Barriers>> barrier1(B_HEIGHT, vector<Barriers>(B_LENGTH));//create a vector to store the first barrier
+			for (int i = 0; i < B_HEIGHT; i++)
+			{
+				for (int j = 0; j < B_LENGTH; j++)
+				{
+					barrier1[i][j].MakeBarriers(nextX, nextY);
+					nextX -= barrier1[i][j].SIZE;
+				}
+				nextX = START_X_1;
+				nextY -= barrier1[i][0].SIZE;
+			}
+	
 
 	//////////////////////////////////////////////
 	////// Game Loop
@@ -207,9 +216,15 @@ void main()
 		
 		if (hasShot) //check if the player has shot
 		{
+			/////////////////////
+			//Move the shot
+			/////////////////////
 			playerShot.worldPosition.y -= (deltaTime * SHOT_SPEED); //continue to move the shot up the screen every frame
 			playerShot.Draw();
 
+			////////////////////////////////////
+			/////detect when shot leeves screen
+			////////////////////////////////////
 			if (playerShot.worldPosition.y <= 0) //if the players shot goes past the top of the screen
 			{
 				hasShot = false; //set has shot to false
@@ -219,6 +234,10 @@ void main()
 			{
 				enemy.isDead = true;
 			}*/
+
+			////////////////////////////////////
+			/////Collisions for Enemies
+			////////////////////////////////////
 			for (int i = 0; i < EN_ROWS; i++)
 			{
 				for (int j = 0; j < EN_COLS; j++)
@@ -239,8 +258,32 @@ void main()
 					}
 				}
 			}
+
+			for (int i = 0; i < B_HEIGHT; i++)
+			{
+				for (int j = 0; j < B_LENGTH; j++)
+				{
+					if (!barrier1[i][j].isDead)
+					{
+						if (barrier1[i][j].Box.Overlaps(playerShot.worldPosition))
+						{
+							PlaySound(boom);
+							barrier1[i][j].isDead = true;
+							barrier1[i][j].worldPosition.x = -100;
+							if (!shootThrough)
+							{
+								hasShot = false;
+							}
+						}
+					}
+				}
+			}
 		}
 
+
+		////////////////////////////
+		//////Enemy Movement
+		////////////////////////////
 		for (int i = 0; i < EN_ROWS; i++)
 		{
 			for (int j = 0; j < EN_COLS; j++)
@@ -322,7 +365,17 @@ void main()
 		//	enemy.Box.DebugBox(GREEN);
 		//	enemy.Draw();
 		//}	
-		barrier.DrawBarriers();
+
+		for (int i = 0; i < B_HEIGHT; i++)
+		{
+			for (int j = 0; j < B_LENGTH; j++)
+			{
+				if (!barrier1[i][j].isDead)
+				{
+					barrier1[i][j].DrawBarriers();
+				}
+			}
+		}
 
 		DrawText(TextFormat("Scrap: %05i", scrap), 10, 10, 20, WHITE);
 		EndDrawing();
