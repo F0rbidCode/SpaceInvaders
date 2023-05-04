@@ -3,30 +3,17 @@
 #include "raymath.h"
 #include "AABB.h"
 #include <vector>
+#include "Actor.h"
+#include "Barriers.h"
 
 
 using namespace std;
 
-struct Actor {
-	Vector2 worldPosition; //used to store world position
-	Vector2 Max;
-	AABB Box; //create an AABB for enemy collisions
-	Texture2D texture; // used to store texture
-	Image image; // used to store image
-	bool isDead = false; //used to determin if actor is still alive
-	float scale; //used to set the scale of the actor
-	//int count = 0; //used to determing the length of time the explosion stays on the screen
 
-public:
-	void Draw()
-	{
-		DrawTextureEx(texture, worldPosition, 0, scale, WHITE);
-	}
-};
 
-//prototype for creating the barriers
-void Barriers();
-void DrawBarriers(Actor barrier);
+////prototype for creating the barriers
+//void Barriers();
+//void DrawBarriers(Actor barrier);
 
 void main()
 {
@@ -152,14 +139,19 @@ void main()
     /////////////////////////////////////////////////////////////////
     /// BARRIERS
 	//////////////////////////////
-			Actor barrier;
+			/*Actor barrier;
 
 			barrier.scale = 1;
 			barrier.worldPosition.x = GetScreenWidth() /2;
 			barrier.worldPosition.y = GetScreenHeight() * .75;
 			barrier.isDead = false;
-	
-	///////////////////////////////////////////////
+	*/
+			Barriers barrier;
+			barrier.MakeBarriers();
+			/*barrier.worldPosition.x = GetScreenWidth() / 2;;
+			barrier.worldPosition.y = GetScreenHeight() * .75;*/
+
+	//////////////////////////////////////////////
 	////// Game Loop
 	//////////////////////////////////////////////
 	while (game)
@@ -330,9 +322,9 @@ void main()
 		//	enemy.Box.DebugBox(GREEN);
 		//	enemy.Draw();
 		//}	
-		DrawBarriers(barrier);
-		DrawText(TextFormat("Scrap: %05i", scrap), 10, 10, 20, WHITE);
+		barrier.DrawBarriers();
 
+		DrawText(TextFormat("Scrap: %05i", scrap), 10, 10, 20, WHITE);
 		EndDrawing();
 		
 		/////////////////////////////////////////////////////

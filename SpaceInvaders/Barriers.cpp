@@ -1,18 +1,14 @@
 #include "Barriers.h"
 
-void Barriers()
+void Barriers :: MakeBarriers()
 {
-	Actor barrier;
-
-	barrier.scale = 1;
-	barrier.worldPosition.x = GetScreenWidth();
-	barrier.worldPosition.y = GetScreenHeight() * .75;
-	barrier.isDead = false;
-	const int SIZE = 20;
-
+	worldPosition.x = GetScreenWidth() /2;
+	worldPosition.y = GetScreenHeight() * .75;
+	isDead = false;
+	
 }
 
-void DrawBarriers(Actor barrier)
+ void Barriers :: DrawBarriers()
 {
-	DrawRectangle((int)barrier.worldPosition.x, (int)barrier.worldPosition.y, SIZE, 20, GREEN);
+	DrawRectangle((int)worldPosition.x, (int)worldPosition.y, SIZE, SIZE, GREEN);
 }
