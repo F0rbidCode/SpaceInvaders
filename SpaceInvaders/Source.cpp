@@ -97,6 +97,7 @@ void main()
 			//Initialise Enemy Shot
 			Actor enemyShot;
 			const float ENEMY_SHOT_SPEED = 200; //set the speed of enemy shots
+			float enemySpeedUp = 1;
 			bool EnemyHasShot = false;//set enemy has shot to false to enable them to shoot
 			enemyShot.scale = 0.5; // set scale of enemy shot sprite
 
@@ -396,6 +397,7 @@ void main()
 						explode.worldPosition.y = enemies[i][j].worldPosition.y + (enemies[i][j].texture.height * enemies[i][j].scale) / 2;
 						explode.isDead = false;
 						enemies[i][j].isDead = true;
+						enemySpeedUp += 0.1;
 						enemies[i][j].worldPosition.x = -100;
 						PlaySound(boom);
 						scrap += scrapPerKill;
@@ -569,7 +571,7 @@ void main()
 				{
 					if (goRight)
 					{
-						enemies[i][j].worldPosition.x += (deltaTime * ENEMY_SPEED);
+						enemies[i][j].worldPosition.x += ((deltaTime * ENEMY_SPEED) * enemySpeedUp);
 
 						if (enemies[i][j].worldPosition.x + (enemies[i][j].texture.width / 2) >= GetScreenWidth())
 						{
@@ -585,7 +587,7 @@ void main()
 					}
 					if (!goRight)
 					{
-						enemies[i][j].worldPosition.x -= (deltaTime * ENEMY_SPEED);
+						enemies[i][j].worldPosition.x -= ((deltaTime * ENEMY_SPEED) * enemySpeedUp);
 						if (enemies[i][j].worldPosition.x <= 0)
 						{
 							for (int i = 0; i < EN_ROWS; i++)
@@ -712,13 +714,15 @@ void GameOver(int scrap)
 		DrawText(TextFormat("Scrap: %05i", scrap), (GetScreenWidth() / 2) - 50, 10, 20, WHITE);
 		DrawText("GAME OVER", (GetScreenWidth() / 2) - (MeasureText("GAME OVER", 50) / 2), GetScreenHeight() / 2, 50, WHITE);
 
+		EndDrawing();
+
 		if (IsKeyPressed(KEY_ESCAPE))///if escape key is pressed
 		{
 			CloseWindow(); //close the game window
 			esc = true; //end the loop
 		}
 
-		EndDrawing();
+		
 	}
 }
 
@@ -736,12 +740,14 @@ void GameWin(int scrap)
 		DrawText(TextFormat("Scrap: %05i", scrap), (GetScreenWidth() / 2) - 50, 10, 20, WHITE);
 		DrawText(message.c_str(), (GetScreenWidth() / 2) - (MeasureText(message.c_str(), 50) / 2), GetScreenHeight() / 2, 50, WHITE);
 
+		EndDrawing();
+
 		if (IsKeyPressed(KEY_ESCAPE))///if escape key is pressed
 		{
 			CloseWindow(); //close the game window
 			esc = true; //end the loop
 		}
 
-		EndDrawing();
+		
 	}
 }
