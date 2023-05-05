@@ -9,12 +9,6 @@
 
 using namespace std;
 
-
-
-////prototype for creating the barriers
-//void Barriers();
-//void DrawBarriers(Actor barrier);
-
 void main()
 {
 	/////////////////////////////////////
@@ -53,10 +47,11 @@ void main()
 			const float PLAYER_SPEED = 200.00; //set the speed of the player
 		
 
-		///Initialise Player SHot
+		///Initialise Player Shot
 			Actor playerShot; //initialise a bullet for the player
 			const float SHOT_SPEED = 400; //set the speeds of shots
 			bool hasShot = false; //initialise a bool to determin if the player has shot
+			bool firstShot = false;
 			playerShot.image = LoadImage("laserBlue01.png");
 			playerShot.texture = LoadTextureFromImage(playerShot.image);
 			playerShot.scale = 0.5;
@@ -95,15 +90,29 @@ void main()
 			int lastX = 0;
 			int lastY = 0;
 
+			//Initialise Enemy Shot
+			Actor enemyShot;
+			const float ENEMY_SHOT_SPEED = 200; //set the speed of enemy shots
+			bool EnemyHasShot = false;//set enemy has shot to false to enable them to shoot
+			enemyShot.scale = 0.5; // set scale of enemy shot sprite
+
+			int colToShoot; //used to determin wich enemy will shoot
+			const int CHANCE_TO_SHOOT = 3; //used to determin frequency of shot
+
 			//create an actor to display explosion
 			Actor explode;
 			explode.image = LoadImage("laserRed08.png");
 			explode.texture = LoadTextureFromImage(explode.image);
 			int count = 0;
-			const int LENGTH = 15; //amount of time the explode will be displayed			
+			const int LENGTH = 15; //amount of time the explode will be displayed		
+			enemyShot.image = LoadImage("laserRed07.png");
+			enemyShot.texture = LoadTextureFromImage(enemyShot.image);
 			explode.scale = 0.5;
 			
 			
+			//////////////////////
+			///Set enemies
+			//////////////////////
 			for (int i = 0; i < EN_ROWS; i++)
 			{
 				for (int j = 0; j < EN_COLS; j++)
@@ -239,6 +248,32 @@ void main()
 		playerBox.Fit(player.worldPosition, playerMax);
 		//enemy.Box.Fit(enemy.worldPosition, enemy.Max);
 
+		////////////////////////////////////////
+		////Trigger Enemy Shot
+		////////////////////////////////////////
+		if (firstShot)
+		{
+			if (!EnemyHasShot)
+			{
+				//seed ramd
+				srand((unsigned)time(NULL));
+				int willShoot = rand() % CHANCE_TO_SHOOT;
+
+				if (willShoot == (CHANCE_TO_SHOOT -1))
+				{
+					colToShoot = rand() % EN_COLS;
+					for (int i = 0; i < EN_ROWS; i++)
+					{
+						if (!enemies[i][colToShoot].isDead)
+						{
+							enemyShot.worldPosition.y = enemies[i][colToShoot].worldPosition.y + enemies[i][colToShoot].texture.height;
+							enemyShot.worldPosition.x = enemies[i][colToShoot].worldPosition.x - (enemies[i][colToShoot].texture.width / 2);;
+							EnemyHasShot = true;
+						}
+					}
+				}
+			}
+		}
 
 		/////////////////////////////////////////////////
 		///// Draw
@@ -363,6 +398,15 @@ void main()
 			}
 		}
 
+		if (EnemyHasShot)
+		{
+			enemyShot.worldPosition.y += (deltaTime * ENEMY_SHOT_SPEED);
+			if (enemyShot.worldPosition.y >= GetScreenHeight())
+			{
+				EnemyHasShot = false;
+			}
+			enemyShot.Draw();
+		}
 
 		////////////////////////////
 		//////Enemy Movement
@@ -522,6 +566,7 @@ void main()
 			if (!hasShot)
 			{
 				hasShot = true;
+				firstShot = true;
 				playerShot.worldPosition.x = player.worldPosition.x + (player.texture.width / 2) - (playerShot.texture.width / 2);
 				playerShot.worldPosition.y = player.worldPosition.y - (playerShot.texture.height / 2);
 				PlaySound(shootfx);
