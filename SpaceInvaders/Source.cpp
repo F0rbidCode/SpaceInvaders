@@ -9,6 +9,9 @@
 
 using namespace std;
 
+//prototype GameOver
+void GameOver(int scrap);
+
 void main()
 {
 	/////////////////////////////////////
@@ -42,7 +45,6 @@ void main()
 			player.worldPosition.y = (GetScreenHeight() - (player.texture.height * 2));
 			player.scale = 1;
 
-			AABB playerBox;
 			Vector2 playerMax; //used to store the lower right position of the player sprite			
 			const float PLAYER_SPEED = 200.00; //set the speed of the player
 		
@@ -201,7 +203,7 @@ void main()
 				for (int j = 0; j < B_LENGTH; j++)
 				{
 					barrier3[i][j].MakeBarriers(nextX, nextY);
-					nextX -= Barriers::SIZE;
+					nextX += Barriers::SIZE;
 				}
 				nextX = START_X_3;
 				nextY -= Barriers::SIZE;
@@ -216,7 +218,12 @@ void main()
 		///////////////////////////////////////////////////////
 		/////UPDATE
 		//////////////////////////////////////////////////////
-		
+
+		if (player.isDead)
+		{
+			game = false;
+			GameOver(scrap);
+		}
 		//calculate delta time
 		previousTime = currentTime;
 		currentTime = GetTime();
@@ -245,7 +252,7 @@ void main()
 		}
 
 		//refit AABBs
-		playerBox.Fit(player.worldPosition, playerMax);
+		player.Box.Fit(player.worldPosition, playerMax);
 		//enemy.Box.Fit(enemy.worldPosition, enemy.Max);
 
 		////////////////////////////////////////
@@ -284,7 +291,7 @@ void main()
 
 		if (!player.isDead)
 		{
-			//playerBox.DebugBox(RED);
+			player.Box.DebugBox(RED);
 			player.Draw();
 		}		
 		
@@ -406,6 +413,82 @@ void main()
 				EnemyHasShot = false;
 			}
 			enemyShot.Draw();
+
+			///////////////////////////////////////////////////
+			//////Collision for player
+			///////////////////////////////////////////////////
+			if (player.Box.Overlaps(enemyShot.worldPosition)) //check if player gets hit
+			{
+				PlaySound(boom); //play sound
+				player.isDead = true; //set player to dead
+				player.worldPosition.x = -100; //moove player off screen
+				EnemyHasShot = false;
+			}
+
+			/////////////////////////////////////////
+			//////////Collisions For Barriers
+			/////////////////////////////////////////
+			//Barrier 1 collisions
+			for (int i = 0; i < B_HEIGHT; i++)
+			{
+				for (int j = 0; j < B_LENGTH; j++)
+				{
+					if (!barrier1[i][j].isDead)
+					{
+						if (barrier1[i][j].Box.Overlaps(enemyShot.worldPosition))
+						{
+							PlaySound(boom);
+							barrier1[i][j].isDead = true;
+							barrier1[i][j].worldPosition.x = -100;
+							if (!shootThrough)
+							{
+								EnemyHasShot = false;
+							}
+						}
+					}
+				}
+			}
+			//barrier 2 collision
+			for (int i = 0; i < B_HEIGHT; i++)
+			{
+				for (int j = 0; j < B_LENGTH; j++)
+				{
+					if (!barrier2[i][j].isDead)
+					{
+						if (barrier2[i][j].Box.Overlaps(enemyShot.worldPosition))
+						{
+							PlaySound(boom);
+							barrier2[i][j].isDead = true;
+							barrier2[i][j].worldPosition.x = -100;
+							if (!shootThrough)
+							{
+								EnemyHasShot = false;
+							}
+						}
+					}
+				}
+			}
+			//barreir 3 collision
+			for (int i = 0; i < B_HEIGHT; i++)
+			{
+				for (int j = 0; j < B_LENGTH; j++)
+				{
+					if (!barrier3[i][j].isDead)
+					{
+						if (barrier3[i][j].Box.Overlaps(enemyShot.worldPosition))
+						{
+							PlaySound(boom);
+							barrier3[i][j].isDead = true;
+							barrier3[i][j].worldPosition.x = -100;
+							if (!shootThrough)
+							{
+								EnemyHasShot = false;
+							}
+						}
+					}
+				}
+			}
+		
 		}
 
 		////////////////////////////
@@ -584,3 +667,26 @@ void main()
 	//system("pause");
 }
 
+void GameOver(int scrap)
+{
+	bool esc = false;
+
+	while (!esc)
+	{
+		BeginDrawing();
+
+		ClearBackground(BLACK);
+
+
+		DrawText(TextFormat("Scrap: %05i", scrap), (GetScreenWidth() / 2) - 50, 10, 20, WHITE);
+		DrawText("GAME OVER", (GetScreenWidth() / 2) - (MeasureText("GAME OVER", 50) / 2), GetScreenHeight() / 2, 50, WHITE);
+
+		if (IsKeyPressed(KEY_ESCAPE))///if escape key is pressed
+		{
+			CloseWindow(); //close the game window
+			esc = true; //end the loop
+		}
+
+		EndDrawing();
+	}
+}
