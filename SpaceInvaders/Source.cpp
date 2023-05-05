@@ -17,8 +17,8 @@ void GameWin(int scrap);
 
 
 
-static const int EN_COLS = 1; //number of collums of enemies
-static const int EN_ROWS = 1; //number of rows of enemies
+static const int EN_COLS = 11; //number of collums of enemies
+static const int EN_ROWS = 5; //number of rows of enemies
 static const int B_LENGTH = 20; //the length pf each barrier
 static const int B_HEIGHT = 10; //the height of each barrier
 
@@ -237,6 +237,7 @@ void main()
 		if (kills == (EN_ROWS * EN_COLS))
 		{
 			kills = 0; //reset kills to 0 for next wave
+			enemySpeedUp = 1;
 			Reset(enemies, barrier1, barrier2, barrier3); // reset enemy positions
 		}
 
@@ -415,8 +416,9 @@ void main()
 						explode.worldPosition.y = enemies[i][j].worldPosition.y + (enemies[i][j].texture.height * enemies[i][j].scale) / 2;
 						explode.isDead = false;
 						enemies[i][j].isDead = true;
-						enemySpeedUp += 0.1;
+						enemySpeedUp += 0.05;
 						enemies[i][j].worldPosition.x = -100;
+						enemies[i][j].worldPosition.y = -1000000;
 						PlaySound(boom);
 						scrap += scrapPerKill;
 						kills++;
@@ -590,7 +592,7 @@ void main()
 				{
 					if (goRight)
 					{
-						//enemies[i][j].worldPosition.x += ((deltaTime * ENEMY_SPEED) * enemySpeedUp);
+						enemies[i][j].worldPosition.x += ((deltaTime * ENEMY_SPEED) * enemySpeedUp);
 
 						if (enemies[i][j].worldPosition.x + (enemies[i][j].texture.width / 2) >= GetScreenWidth())
 						{
