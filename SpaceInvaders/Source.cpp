@@ -9,8 +9,10 @@
 
 using namespace std;
 
-//prototype GameOver
+//prototype GameOver and GameWin
 void GameOver(int scrap);
+void GameWin(int scrap);
+
 
 void main()
 {
@@ -280,6 +282,33 @@ void main()
 					}
 				}
 			}
+			for (int i = 0; i < EN_ROWS; i++)
+			{
+				for (int j = 0; j < EN_COLS; j++)
+				{
+					if (enemies[i][j].worldPosition.y + (enemies[i][j].texture.height * enemies[i][j].scale) >= player.worldPosition.y)
+					{
+						game = false;
+						GameOver(scrap);
+					}
+				}
+			}
+		}
+
+		if (!firstShot)
+		{
+			for (int i = 0; i < EN_ROWS; i++)
+			{
+				for (int j = 0; j < EN_COLS; j++)
+				{
+					if (enemies[i][j].worldPosition.y + (enemies[i][j].texture.height * enemies[i][j].scale) >= player.worldPosition.y)
+					{
+						scrap += 99999;
+						game = false;
+						GameWin(scrap);
+					}
+				}
+			}
 		}
 
 		/////////////////////////////////////////////////
@@ -289,9 +318,47 @@ void main()
 
 		ClearBackground(BLACK);
 
+
+		///////////////////////////////////////////
+		//////Draw Barriers
+		///////////////////////////////////////////
+		////draw Barrier 1
+		for (int i = 0; i < B_HEIGHT; i++)
+		{
+			for (int j = 0; j < B_LENGTH; j++)
+			{
+				if (!barrier1[i][j].isDead)
+				{
+					barrier1[i][j].DrawBarriers();
+				}
+			}
+		}
+		////draw barrier 2
+		for (int i = 0; i < B_HEIGHT; i++)
+		{
+			for (int j = 0; j < B_LENGTH; j++)
+			{
+				if (!barrier2[i][j].isDead)
+				{
+					barrier2[i][j].DrawBarriers();
+				}
+			}
+		}
+		///draw barrier 3
+		for (int i = 0; i < B_HEIGHT; i++)
+		{
+			for (int j = 0; j < B_LENGTH; j++)
+			{
+				if (!barrier3[i][j].isDead)
+				{
+					barrier3[i][j].DrawBarriers();
+				}
+			}
+		}
+
 		if (!player.isDead)
 		{
-			player.Box.DebugBox(RED);
+			//player.Box.DebugBox(RED);
 			player.Draw();
 		}		
 		
@@ -510,7 +577,7 @@ void main()
 							{
 								for (int j = 0; j < EN_COLS; j++)
 								{
-									enemies[i][j].worldPosition.y += ((deltaTime * ENEMY_SPEED) * 2);
+									enemies[i][j].worldPosition.y += ((deltaTime * ENEMY_SPEED) * 10);
 									goRight = false;
 								}
 							}
@@ -525,7 +592,7 @@ void main()
 							{
 								for (int j = 0; j < EN_COLS; j++)
 								{
-									enemies[i][j].worldPosition.y += ((deltaTime * ENEMY_SPEED) * 2);
+									enemies[i][j].worldPosition.y += ((deltaTime * ENEMY_SPEED) * 10);
 									goRight = true;
 								}
 							}
@@ -576,42 +643,6 @@ void main()
 		//	enemy.Draw();
 		//}	
 
-		///////////////////////////////////////////
-		//////Draw Barriers
-		///////////////////////////////////////////
-		////draw Barrier 1
-		for (int i = 0; i < B_HEIGHT; i++)
-		{
-			for (int j = 0; j < B_LENGTH; j++)
-			{
-				if (!barrier1[i][j].isDead)
-				{
-					barrier1[i][j].DrawBarriers();
-				}
-			}
-		}
-		////draw barrier 2
-		for (int i = 0; i < B_HEIGHT; i++)
-		{
-			for (int j = 0; j < B_LENGTH; j++)
-			{
-				if (!barrier2[i][j].isDead)
-				{
-					barrier2[i][j].DrawBarriers();
-				}
-			}
-		}
-		///draw barrier 3
-		for (int i = 0; i < B_HEIGHT; i++)
-		{
-			for (int j = 0; j < B_LENGTH; j++)
-			{
-				if (!barrier3[i][j].isDead)
-				{
-					barrier3[i][j].DrawBarriers();
-				}
-			}
-		}
 
 		DrawText(TextFormat("Scrap: %05i", scrap), 10, 10, 20, WHITE);
 		EndDrawing();
@@ -664,7 +695,7 @@ void main()
 		}
 		
 	}
-	//system("pause");
+	
 }
 
 void GameOver(int scrap)
@@ -680,6 +711,30 @@ void GameOver(int scrap)
 
 		DrawText(TextFormat("Scrap: %05i", scrap), (GetScreenWidth() / 2) - 50, 10, 20, WHITE);
 		DrawText("GAME OVER", (GetScreenWidth() / 2) - (MeasureText("GAME OVER", 50) / 2), GetScreenHeight() / 2, 50, WHITE);
+
+		if (IsKeyPressed(KEY_ESCAPE))///if escape key is pressed
+		{
+			CloseWindow(); //close the game window
+			esc = true; //end the loop
+		}
+
+		EndDrawing();
+	}
+}
+
+void GameWin(int scrap)
+{
+	bool esc = false;
+
+	while (!esc)
+	{
+		BeginDrawing();
+
+		ClearBackground(BLACK);
+		string message = "The alien ships rach you and you discuss tearms of a treaty. \n They offer to work with you to better the human race. \n They also bring you cake.";
+
+		DrawText(TextFormat("Scrap: %05i", scrap), (GetScreenWidth() / 2) - 50, 10, 20, WHITE);
+		DrawText(message.c_str(), (GetScreenWidth() / 2) - (MeasureText(message.c_str(), 50) / 2), GetScreenHeight() / 2, 50, WHITE);
 
 		if (IsKeyPressed(KEY_ESCAPE))///if escape key is pressed
 		{
