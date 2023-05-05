@@ -9,10 +9,18 @@
 
 using namespace std;
 
-//prototype GameOver and GameWin
+//prototype Setup GameOver and GameWin
+void Reset(vector<vector<Actor>> &enemies, vector<vector<Barriers>> &barrier1, vector<vector<Barriers>> &barrier2, vector<vector<Barriers>> &barrier3);
+
 void GameOver(int scrap);
 void GameWin(int scrap);
 
+
+
+static const int EN_COLS = 1; //number of collums of enemies
+static const int EN_ROWS = 1; //number of rows of enemies
+static const int B_LENGTH = 20; //the length pf each barrier
+static const int B_HEIGHT = 10; //the height of each barrier
 
 void main()
 {
@@ -26,6 +34,8 @@ void main()
 
 			int screenWidth = 1920; // set the width of the screen
 			int screenHeight = 1080; // set the height of the screen
+
+			int kills = 0; //stores the number of kills to determin when level has been cleared
 
 			InitAudioDevice();
 
@@ -88,8 +98,8 @@ void main()
 			//variables to create an array of enemies
 			Image image1 = LoadImage("enemyBlack2.png");
 			Texture texture1 = LoadTextureFromImage(image1);
-			const int EN_COLS = 11; //number of collums of enemies
-			const int EN_ROWS = 5; //number of rows of enemies
+
+			
 			vector<vector<Actor>> enemies(EN_ROWS,vector<Actor>(EN_COLS));
 			int lastX = 0;
 			int lastY = 0;
@@ -154,12 +164,14 @@ void main()
     /// BARRIERS
 	//////////////////////////////
 			
-			const int B_LENGTH = 20; //the length pf each barrier
-			const int B_HEIGHT = 10; //the height of each barrier
-			const int START_X_1 = (GetScreenWidth() * 0.25f) - ((B_LENGTH * Barriers::SIZE) / 2); //set the starting X point for the first barrier
-			const int START_X_2 = (GetScreenWidth() * 0.5f) + ((B_LENGTH * Barriers::SIZE) / 2); //set the starting x point for the second barrier
-			const int START_X_3 = (GetScreenWidth() * 0.75f) + ((B_LENGTH * Barriers::SIZE) / 2); //set the starting x point for the third barrier
-			const int START_Y = GetScreenHeight() * 0.75f; //set the Y point for all barriers
+			
+			static const int B_LENGTH = 20; //the length pf each barrier
+			static const int B_HEIGHT = 10; //the height of each barrier
+
+			static const int START_X_1 = (GetScreenWidth() * 0.25f) - ((B_LENGTH * Barriers::SIZE) / 2); //set the starting X point for the first barrier
+			static const int START_X_2 = (GetScreenWidth() * 0.5f) + ((B_LENGTH * Barriers::SIZE) / 2); //set the starting x point for the second barrier
+			static const int START_X_3 = (GetScreenWidth() * 0.75f) + ((B_LENGTH * Barriers::SIZE) / 2); //set the starting x point for the third barrier
+			static const int START_Y = GetScreenHeight() * 0.75f; //set the Y point for
 
 			int nextX = START_X_1; //used to calculate where to put the next peice on the x
 			int nextY = START_Y; //used to calculate where to put the next peice on the y
@@ -222,6 +234,12 @@ void main()
 		/////UPDATE
 		//////////////////////////////////////////////////////
 
+		if (kills == (EN_ROWS * EN_COLS))
+		{
+			kills = 0; //reset kills to 0 for next wave
+			Reset(enemies, barrier1, barrier2, barrier3); // reset enemy positions
+		}
+
 		if (player.isDead)
 		{
 			game = false;
@@ -276,8 +294,8 @@ void main()
 					{
 						if (!enemies[i][colToShoot].isDead)
 						{
-							enemyShot.worldPosition.y = enemies[i][colToShoot].worldPosition.y + enemies[i][colToShoot].texture.height;
-							enemyShot.worldPosition.x = enemies[i][colToShoot].worldPosition.x - (enemies[i][colToShoot].texture.width / 2);;
+							enemyShot.worldPosition.y = enemies[i][colToShoot].worldPosition.y + ((enemies[i][colToShoot].texture.height) * enemies[i][colToShoot].scale);
+							enemyShot.worldPosition.x = enemies[i][colToShoot].worldPosition.x + ((enemies[i][colToShoot].texture.width / 2) * enemies[i][colToShoot].scale);
 							EnemyHasShot = true;
 						}
 					}
@@ -401,6 +419,7 @@ void main()
 						enemies[i][j].worldPosition.x = -100;
 						PlaySound(boom);
 						scrap += scrapPerKill;
+						kills++;
 						if (!shootThrough)
 						{
 							hasShot = false;
@@ -571,7 +590,7 @@ void main()
 				{
 					if (goRight)
 					{
-						enemies[i][j].worldPosition.x += ((deltaTime * ENEMY_SPEED) * enemySpeedUp);
+						//enemies[i][j].worldPosition.x += ((deltaTime * ENEMY_SPEED) * enemySpeedUp);
 
 						if (enemies[i][j].worldPosition.x + (enemies[i][j].texture.width / 2) >= GetScreenWidth())
 						{
@@ -700,6 +719,87 @@ void main()
 	
 }
 
+void Reset(vector<vector<Actor>> &enemies, vector<vector<Barriers>> &barrier1, vector<vector<Barriers>> &barrier2, vector<vector<Barriers>> &barrier3)
+{
+			//////////////////////
+			///Set enemies
+			//////////////////////
+
+	int lastX = 0;
+	int lastY = 0;
+	for (int i = 0; i < EN_ROWS; i++)
+	{
+		for (int j = 0; j < EN_COLS; j++)
+		{   
+			//set x and y positions for the enemy
+			enemies[i][j].worldPosition.x = lastX + (enemies[0][0].texture.width);
+			enemies[i][j].worldPosition.y = lastY + (enemies[0][0].texture.height);
+
+			lastX = enemies[i][j].worldPosition.x;
+
+			//add enemy to array
+			enemies[i][j].isDead = false;
+		}
+		lastX = 0;
+		lastY = lastY + enemies[0][0].texture.height;
+	}
+
+	static const int START_X_1 = (GetScreenWidth() * 0.25f) - ((B_LENGTH * Barriers::SIZE) / 2); //set the starting X point for the first barrier
+	static const int START_X_2 = (GetScreenWidth() * 0.5f) + ((B_LENGTH * Barriers::SIZE) / 2); //set the starting x point for the second barrier
+	static const int START_X_3 = (GetScreenWidth() * 0.75f) + ((B_LENGTH * Barriers::SIZE) / 2); //set the starting x point for the third barrier
+	static const int START_Y = GetScreenHeight() * 0.75f; //set the Y point for all barriers
+
+
+	////////////////////////////////////////
+	////Set up Barrier 1
+	////////////////////////////////////////
+
+	int nextX = START_X_1; //used to calculate where to put the next peice on the x
+	int nextY = START_Y; //used to calculate where to put the next peice on the y
+	for (int i = 0; i < B_HEIGHT; i++)
+	{
+		for (int j = 0; j < B_LENGTH; j++)
+		{
+			barrier1[i][j].MakeBarriers(nextX, nextY);
+			nextX -= Barriers::SIZE;
+		}
+		nextX = START_X_1;
+		nextY -= Barriers::SIZE;
+	}
+
+	///////////////////////////////////////////
+	///////Set Up Barrier 2
+	///////////////////////////////////////////
+	nextX = START_X_2;
+	nextY = START_Y;
+	for (int i = 0; i < B_HEIGHT; i++)
+	{
+		for (int j = 0; j < B_LENGTH; j++)
+		{
+			barrier2[i][j].MakeBarriers(nextX, nextY);
+			nextX -= Barriers::SIZE;
+		}
+		nextX = START_X_2;
+		nextY -= Barriers::SIZE;
+	}
+
+	/////////////////////////////////////////////
+	//////Set Up Barrier 3
+	/////////////////////////////////////////////
+	nextX = START_X_3;
+	nextY = START_Y;
+	for (int i = 0; i < B_HEIGHT; i++)
+	{
+		for (int j = 0; j < B_LENGTH; j++)
+		{
+			barrier3[i][j].MakeBarriers(nextX, nextY);
+			nextX += Barriers::SIZE;
+		}
+		nextX = START_X_3;
+		nextY -= Barriers::SIZE;
+	}
+}
+
 void GameOver(int scrap)
 {
 	bool esc = false;
@@ -718,10 +818,8 @@ void GameOver(int scrap)
 
 		if (IsKeyPressed(KEY_ESCAPE))///if escape key is pressed
 		{
-			CloseWindow(); //close the game window
 			esc = true; //end the loop
 		}
-
 		
 	}
 }
@@ -743,8 +841,7 @@ void GameWin(int scrap)
 		EndDrawing();
 
 		if (IsKeyPressed(KEY_ESCAPE))///if escape key is pressed
-		{
-			CloseWindow(); //close the game window
+		{			
 			esc = true; //end the loop
 		}
 
