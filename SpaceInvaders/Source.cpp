@@ -163,7 +163,7 @@ void main()
 			Sound shootfx = LoadSound("sfx_laser2.ogg");
 			Sound boom = LoadSound("mixkit-pixel-chiptune-explosion-1692.wav");
 
-    /////////////////////////////////////////////////////////////////
+    //////////////////////////////
     /// BARRIERS
 	//////////////////////////////
 			
@@ -231,369 +231,296 @@ void main()
 	//////////////////////////////////////////////
 	////// Game Loop
 	//////////////////////////////////////////////
-			while (game)
-			{
-				///////////////////////////////////////////////////////
-				/////UPDATE
-				//////////////////////////////////////////////////////
-
-				if (kills == (EN_ROWS * EN_COLS))
+			
+				while (game)
 				{
-					kills = 0; //reset kills to 0 for next wave
-					enemySpeedUp = 1;
+					///////////////////////////////////////////////////////
+					/////UPDATE
+					//////////////////////////////////////////////////////
 
-					Upgrade(paused, scrap, shootThrough);
-
-					Reset(enemies, barrier1, barrier2, barrier3); // reset enemy positions
-
-				}
-
-				if (player.isDead)
-				{
-					game = false;
-					GameOver(scrap);
-				}
-				//calculate delta time
-				previousTime = currentTime;
-				currentTime = GetTime();
-				deltaTime = (currentTime - previousTime);
-
-
-				//calculate the new x and y position of the lower right corner of player sprite
-				playerMax.x = player.worldPosition.x + (player.texture.width * player.scale);
-				playerMax.y = player.worldPosition.y + (player.texture.height * player.scale);
-
-				////calculate the new x and y positios of the lower right corner of the enemy
-				//enemy.Max.x = enemy.worldPosition.x + (enemy.texture.width * enemy.scale);
-				//enemy.Max.y = enemy.worldPosition.y + (enemy.texture.height * enemy.scale);
-
-				for (int i = 0; i < EN_ROWS; i++)
-				{
-					for (int j = 0; j < EN_COLS; j++)
+					if (kills == (EN_ROWS * EN_COLS))
 					{
-						//calculate the new x and y positios of the lower right corner of the enemy
-						enemies[i][j].Max.x = enemies[i][j].worldPosition.x + (enemies[i][j].texture.width * enemies[i][j].scale);
-						enemies[i][j].Max.y = enemies[i][j].worldPosition.y + (enemies[i][j].texture.height * enemies[i][j].scale);
+						kills = 0; //reset kills to 0 for next wave
+						enemySpeedUp = 1;
 
-						//Fit enemy AABB
-						enemies[i][j].Box.Fit(enemies[i][j].worldPosition, enemies[i][j].Max);
-					}
-				}
-
-				//refit AABBs
-				player.Box.Fit(player.worldPosition, playerMax);
-				//enemy.Box.Fit(enemy.worldPosition, enemy.Max);
-
-					////////////////////////////////////////
-					////Trigger Enemy Shot
-					////////////////////////////////////////
-				if (firstShot)
-				{
-					if (!EnemyHasShot)
-					{
-						//seed ramd
-						srand((unsigned)time(NULL));
-						int willShoot = rand() % CHANCE_TO_SHOOT;
-
-						if (willShoot == (CHANCE_TO_SHOOT - 1))
+						paused = true;
+						while (paused)
 						{
-							colToShoot = rand() % EN_COLS;
-							for (int i = 0; i < EN_ROWS; i++)
+							Upgrade(paused, scrap, shootThrough);
+						}
+						
+
+						Reset(enemies, barrier1, barrier2, barrier3); // reset enemy positions
+
+					}
+
+					if (player.isDead)
+					{
+						game = false;
+						GameOver(scrap);
+					}
+					//calculate delta time
+					previousTime = currentTime;
+					currentTime = GetTime();
+					deltaTime = (currentTime - previousTime);
+
+
+					//calculate the new x and y position of the lower right corner of player sprite
+					playerMax.x = player.worldPosition.x + (player.texture.width * player.scale);
+					playerMax.y = player.worldPosition.y + (player.texture.height * player.scale);
+
+					////calculate the new x and y positios of the lower right corner of the enemy
+					//enemy.Max.x = enemy.worldPosition.x + (enemy.texture.width * enemy.scale);
+					//enemy.Max.y = enemy.worldPosition.y + (enemy.texture.height * enemy.scale);
+
+					for (int i = 0; i < EN_ROWS; i++)
+					{
+						for (int j = 0; j < EN_COLS; j++)
+						{
+							//calculate the new x and y positios of the lower right corner of the enemy
+							enemies[i][j].Max.x = enemies[i][j].worldPosition.x + (enemies[i][j].texture.width * enemies[i][j].scale);
+							enemies[i][j].Max.y = enemies[i][j].worldPosition.y + (enemies[i][j].texture.height * enemies[i][j].scale);
+
+							//Fit enemy AABB
+							enemies[i][j].Box.Fit(enemies[i][j].worldPosition, enemies[i][j].Max);
+						}
+					}
+
+					//refit AABBs
+					player.Box.Fit(player.worldPosition, playerMax);
+					//enemy.Box.Fit(enemy.worldPosition, enemy.Max);
+
+						////////////////////////////////////////
+						////Trigger Enemy Shot
+						////////////////////////////////////////
+					if (firstShot)
+					{
+						if (!EnemyHasShot)
+						{
+							//seed ramd
+							srand((unsigned)time(NULL));
+							int willShoot = rand() % CHANCE_TO_SHOOT;
+
+							if (willShoot == (CHANCE_TO_SHOOT - 1))
 							{
-								if (!enemies[i][colToShoot].isDead)
+								colToShoot = rand() % EN_COLS;
+								for (int i = 0; i < EN_ROWS; i++)
 								{
-									enemyShot.worldPosition.y = enemies[i][colToShoot].worldPosition.y + ((enemies[i][colToShoot].texture.height) * enemies[i][colToShoot].scale);
-									enemyShot.worldPosition.x = enemies[i][colToShoot].worldPosition.x + ((enemies[i][colToShoot].texture.width / 2) * enemies[i][colToShoot].scale);
-									EnemyHasShot = true;
+									if (!enemies[i][colToShoot].isDead)
+									{
+										enemyShot.worldPosition.y = enemies[i][colToShoot].worldPosition.y + ((enemies[i][colToShoot].texture.height) * enemies[i][colToShoot].scale);
+										enemyShot.worldPosition.x = enemies[i][colToShoot].worldPosition.x + ((enemies[i][colToShoot].texture.width / 2) * enemies[i][colToShoot].scale);
+										EnemyHasShot = true;
+									}
 								}
 							}
 						}
-					}
-					for (int i = 0; i < EN_ROWS; i++)
-					{
-						for (int j = 0; j < EN_COLS; j++)
+						for (int i = 0; i < EN_ROWS; i++)
 						{
-							if (enemies[i][j].worldPosition.y + (enemies[i][j].texture.height * enemies[i][j].scale) >= player.worldPosition.y)
+							for (int j = 0; j < EN_COLS; j++)
 							{
-								game = false;
-								GameOver(scrap);
-							}
-						}
-					}
-				}
-
-				if (!firstShot)
-				{
-					for (int i = 0; i < EN_ROWS; i++)
-					{
-						for (int j = 0; j < EN_COLS; j++)
-						{
-							if (enemies[i][j].worldPosition.y + (enemies[i][j].texture.height * enemies[i][j].scale) >= player.worldPosition.y)
-							{
-								scrap += 99999;
-								game = false;
-								GameWin(scrap);
-							}
-						}
-					}
-				}
-
-
-				/////////////////////////////////////////////////
-				///// Draw
-				////////////////////////////////////////////////
-				BeginDrawing();
-
-				ClearBackground(BLACK);
-
-
-				///////////////////////////////////////////
-				//////Draw Barriers
-				///////////////////////////////////////////
-				////draw Barrier 1
-				for (int i = 0; i < B_HEIGHT; i++)
-				{
-					for (int j = 0; j < B_LENGTH; j++)
-					{
-						if (!barrier1[i][j].isDead)
-						{
-							barrier1[i][j].DrawBarriers();
-						}
-					}
-				}
-				////draw barrier 2
-				for (int i = 0; i < B_HEIGHT; i++)
-				{
-					for (int j = 0; j < B_LENGTH; j++)
-					{
-						if (!barrier2[i][j].isDead)
-						{
-							barrier2[i][j].DrawBarriers();
-						}
-					}
-				}
-				///draw barrier 3
-				for (int i = 0; i < B_HEIGHT; i++)
-				{
-					for (int j = 0; j < B_LENGTH; j++)
-					{
-						if (!barrier3[i][j].isDead)
-						{
-							barrier3[i][j].DrawBarriers();
-						}
-					}
-				}
-
-				if (!player.isDead)
-				{
-					//player.Box.DebugBox(RED);
-					player.Draw();
-				}
-
-				if (hasShot) //check if the player has shot
-				{
-					/////////////////////
-					//Move the shot
-					/////////////////////
-					playerShot.worldPosition.y -= (deltaTime * SHOT_SPEED); //continue to move the shot up the screen every frame
-					playerShot.Draw();
-
-					////////////////////////////////////
-					/////detect when shot leeves screen
-					////////////////////////////////////
-					if (playerShot.worldPosition.y <= 0) //if the players shot goes past the top of the screen
-					{
-						hasShot = false; //set has shot to false
-					}
-
-					/*if (enemy.Box.Overlaps(playerShot.worldPosition))
-					{
-						enemy.isDead = true;
-					}*/
-
-					////////////////////////////////////
-					/////Collisions for Enemies
-					////////////////////////////////////
-					for (int i = 0; i < EN_ROWS; i++)
-					{
-						for (int j = 0; j < EN_COLS; j++)
-						{
-							if (enemies[i][j].Box.Overlaps(playerShot.worldPosition))
-							{
-								explode.worldPosition.x = enemies[i][j].worldPosition.x + (enemies[i][j].texture.width * enemies[i][j].scale) / 2;
-								explode.worldPosition.y = enemies[i][j].worldPosition.y + (enemies[i][j].texture.height * enemies[i][j].scale) / 2;
-								explode.isDead = false;
-								enemies[i][j].isDead = true;
-								enemySpeedUp += 0.05;
-								enemies[i][j].worldPosition.x = -100;
-								enemies[i][j].worldPosition.y = -1000000;
-								PlaySound(boom);
-								scrap += scrapPerKill;
-								kills++;
-								if (!shootThrough)
+								if (enemies[i][j].worldPosition.y + (enemies[i][j].texture.height * enemies[i][j].scale) >= player.worldPosition.y)
 								{
-									hasShot = false;
+									game = false;
+									GameOver(scrap);
 								}
 							}
 						}
 					}
 
-					/////////////////////////////////////////
-					//////////Collisions For Barriers
-					/////////////////////////////////////////
-					//Barrier 1 collisions
+					if (!firstShot)
+					{
+						for (int i = 0; i < EN_ROWS; i++)
+						{
+							for (int j = 0; j < EN_COLS; j++)
+							{
+								if (enemies[i][j].worldPosition.y + (enemies[i][j].texture.height * enemies[i][j].scale) >= player.worldPosition.y)
+								{
+									scrap += 99999;
+									game = false;
+									GameWin(scrap);
+								}
+							}
+						}
+					}
+
+					if (hasShot) //check if the player has shot
+					{
+						/////////////////////
+						//Move the shot
+						/////////////////////
+						playerShot.worldPosition.y -= (deltaTime * SHOT_SPEED); //continue to move the shot up the screen every frame
+						
+
+						////////////////////////////////////
+						/////detect when shot leeves screen
+						////////////////////////////////////
+						if (playerShot.worldPosition.y <= 0) //if the players shot goes past the top of the screen
+						{
+							hasShot = false; //set has shot to false
+						}
+
+						/*if (enemy.Box.Overlaps(playerShot.worldPosition))
+						{
+							enemy.isDead = true;
+						}*/
+
+						////////////////////////////////////
+						/////Collisions for Enemies
+						////////////////////////////////////
+						for (int i = 0; i < EN_ROWS; i++)
+						{
+							for (int j = 0; j < EN_COLS; j++)
+							{
+								if (enemies[i][j].Box.Overlaps(playerShot.worldPosition))
+								{
+									explode.worldPosition.x = enemies[i][j].worldPosition.x + (enemies[i][j].texture.width * enemies[i][j].scale) / 2;
+									explode.worldPosition.y = enemies[i][j].worldPosition.y + (enemies[i][j].texture.height * enemies[i][j].scale) / 2;
+									explode.isDead = false;
+									enemies[i][j].isDead = true;
+									enemySpeedUp += 0.05;
+									enemies[i][j].worldPosition.x = -100;
+									enemies[i][j].worldPosition.y = -1000000;
+									PlaySound(boom);
+									scrap += scrapPerKill;
+									kills++;
+									if (!shootThrough)
+									{
+										hasShot = false;
+									}
+								}
+							}
+						}
+
+						/////////////////////////////////////////
+						//////////Collisions For Barriers
+						/////////////////////////////////////////
+						//Barrier 1 collisions
+						for (int i = 0; i < B_HEIGHT; i++)
+						{
+							for (int j = 0; j < B_LENGTH; j++)
+							{
+								if (!barrier1[i][j].isDead)
+								{
+									if (barrier1[i][j].Box.Overlaps(playerShot.worldPosition))
+									{
+										PlaySound(boom);
+										barrier1[i][j].isDead = true;
+										barrier1[i][j].worldPosition.x = -100;
+										if (!shootThrough)
+										{
+											hasShot = false;
+										}
+									}
+								}
+							}
+						}
+						//barrier 2 collision
+						for (int i = 0; i < B_HEIGHT; i++)
+						{
+							for (int j = 0; j < B_LENGTH; j++)
+							{
+								if (!barrier2[i][j].isDead)
+								{
+									if (barrier2[i][j].Box.Overlaps(playerShot.worldPosition))
+									{
+										PlaySound(boom);
+										barrier2[i][j].isDead = true;
+										barrier2[i][j].worldPosition.x = -100;
+										if (!shootThrough)
+										{
+											hasShot = false;
+										}
+									}
+								}
+							}
+						}
+						//barreir 3 collision
+						for (int i = 0; i < B_HEIGHT; i++)
+						{
+							for (int j = 0; j < B_LENGTH; j++)
+							{
+								if (!barrier3[i][j].isDead)
+								{
+									if (barrier3[i][j].Box.Overlaps(playerShot.worldPosition))
+									{
+										PlaySound(boom);
+										barrier3[i][j].isDead = true;
+										barrier3[i][j].worldPosition.x = -100;
+										if (!shootThrough)
+										{
+											hasShot = false;
+										}
+									}
+								}
+							}
+						}
+					}
+
+
+					/////////////////////////////////////////////////
+					///// Draw
+					////////////////////////////////////////////////
+					BeginDrawing();
+
+					ClearBackground(BLACK);
+
+
+					///////////////////////////////////////////
+					//////Draw Barriers
+					///////////////////////////////////////////
+					////draw Barrier 1
 					for (int i = 0; i < B_HEIGHT; i++)
 					{
 						for (int j = 0; j < B_LENGTH; j++)
 						{
 							if (!barrier1[i][j].isDead)
 							{
-								if (barrier1[i][j].Box.Overlaps(playerShot.worldPosition))
-								{
-									PlaySound(boom);
-									barrier1[i][j].isDead = true;
-									barrier1[i][j].worldPosition.x = -100;
-									if (!shootThrough)
-									{
-										hasShot = false;
-									}
-								}
+								barrier1[i][j].DrawBarriers();
 							}
 						}
 					}
-					//barrier 2 collision
+					////draw barrier 2
 					for (int i = 0; i < B_HEIGHT; i++)
 					{
 						for (int j = 0; j < B_LENGTH; j++)
 						{
 							if (!barrier2[i][j].isDead)
 							{
-								if (barrier2[i][j].Box.Overlaps(playerShot.worldPosition))
-								{
-									PlaySound(boom);
-									barrier2[i][j].isDead = true;
-									barrier2[i][j].worldPosition.x = -100;
-									if (!shootThrough)
-									{
-										hasShot = false;
-									}
-								}
+								barrier2[i][j].DrawBarriers();
 							}
 						}
 					}
-					//barreir 3 collision
+					///draw barrier 3
 					for (int i = 0; i < B_HEIGHT; i++)
 					{
 						for (int j = 0; j < B_LENGTH; j++)
 						{
 							if (!barrier3[i][j].isDead)
 							{
-								if (barrier3[i][j].Box.Overlaps(playerShot.worldPosition))
-								{
-									PlaySound(boom);
-									barrier3[i][j].isDead = true;
-									barrier3[i][j].worldPosition.x = -100;
-									if (!shootThrough)
-									{
-										hasShot = false;
-									}
-								}
-							}
-						}
-					}
-				}
-
-				if (EnemyHasShot)
-				{
-					enemyShot.worldPosition.y += (deltaTime * ENEMY_SHOT_SPEED);
-					if (enemyShot.worldPosition.y >= GetScreenHeight())
-					{
-						EnemyHasShot = false;
-					}
-					enemyShot.Draw();
-
-					///////////////////////////////////////////////////
-					//////Collision for player
-					///////////////////////////////////////////////////
-					if (player.Box.Overlaps(enemyShot.worldPosition)) //check if player gets hit
-					{
-						PlaySound(boom); //play sound
-						player.isDead = true; //set player to dead
-						player.worldPosition.x = -100; //moove player off screen
-						EnemyHasShot = false;
-					}
-
-					/////////////////////////////////////////
-					//////////Collisions For Barriers
-					/////////////////////////////////////////
-					//Barrier 1 collisions
-					for (int i = 0; i < B_HEIGHT; i++)
-					{
-						for (int j = 0; j < B_LENGTH; j++)
-						{
-							if (!barrier1[i][j].isDead)
-							{
-								if (barrier1[i][j].Box.Overlaps(enemyShot.worldPosition))
-								{
-									PlaySound(boom);
-									barrier1[i][j].isDead = true;
-									barrier1[i][j].worldPosition.x = -100;
-									if (!shootThrough)
-									{
-										EnemyHasShot = false;
-									}
-								}
-							}
-						}
-					}
-					//barrier 2 collision
-					for (int i = 0; i < B_HEIGHT; i++)
-					{
-						for (int j = 0; j < B_LENGTH; j++)
-						{
-							if (!barrier2[i][j].isDead)
-							{
-								if (barrier2[i][j].Box.Overlaps(enemyShot.worldPosition))
-								{
-									PlaySound(boom);
-									barrier2[i][j].isDead = true;
-									barrier2[i][j].worldPosition.x = -100;
-									if (!shootThrough)
-									{
-										EnemyHasShot = false;
-									}
-								}
-							}
-						}
-					}
-					//barreir 3 collision
-					for (int i = 0; i < B_HEIGHT; i++)
-					{
-						for (int j = 0; j < B_LENGTH; j++)
-						{
-							if (!barrier3[i][j].isDead)
-							{
-								if (barrier3[i][j].Box.Overlaps(enemyShot.worldPosition))
-								{
-									PlaySound(boom);
-									barrier3[i][j].isDead = true;
-									barrier3[i][j].worldPosition.x = -100;
-									if (!shootThrough)
-									{
-										EnemyHasShot = false;
-									}
-								}
+								barrier3[i][j].DrawBarriers();
 							}
 						}
 					}
 
-				}
-				
+					if (!player.isDead)
+					{
+						//player.Box.DebugBox(RED);
+						player.Draw();
+					}
+
+					if (hasShot) //check if the player has shot
+					{
+						
+						playerShot.Draw();					
+
+					}
+
 
 					////////////////////////////
 					//////Enemy Movement
 					////////////////////////////
-				
+
 					for (int i = 0; i < EN_ROWS; i++)
 					{
 						for (int j = 0; j < EN_COLS; j++)
@@ -636,101 +563,102 @@ void main()
 								enemies[i][j].Draw();
 							}
 						}
+
+
+
+
+
+
+						if (!explode.isDead)
+						{
+							count++; //calculate the amount of time the explosion has been on screen
+							if (count > LENGTH) //if the explosion has been on for longert then LENGTH
+							{
+								explode.isDead = true; //set is dead to true so explosion will stop drawing
+								count = 0; // reset counter
+							}
+							explode.Draw();
+						}
+
+						//if (!enemy.isDead)
+						//{
+						//	if (goRight)
+						//	{
+						//		enemy.worldPosition.x += (deltaTime * ENEMY_SPEED);
+
+						//		if (enemy.worldPosition.x + (enemy.texture.width / 2) >= GetScreenWidth())
+						//		{
+						//			enemy.worldPosition.y += ((deltaTime * ENEMY_SPEED) * 2);
+						//			goRight = false;
+						//		}
+						//	}
+						//	if (!goRight)
+						//	{
+						//		enemy.worldPosition.x -= (deltaTime * ENEMY_SPEED);
+						//		if (enemy.worldPosition.x <= 0)
+						//		{
+						//			enemy.worldPosition.y += ((deltaTime * ENEMY_SPEED) * 2);
+						//			goRight = true;
+						//		}
+						//	}
+
+						//	enemy.Box.DebugBox(GREEN);
+						//	enemy.Draw();
+						//}	
+
+
+						DrawText(TextFormat("Scrap: %05i", scrap), 10, 10, 20, WHITE);
+						EndDrawing();
+
+						/////////////////////////////////////////////////////
+						///Get User Inpiut
+						/////////////////////////////////////////////////////
+
+						if (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D))
+						{
+							if (player.worldPosition.x + player.texture.width >= GetScreenWidth())
+							{
+
+							}
+							else
+							{
+								player.worldPosition.x += (deltaTime * PLAYER_SPEED);
+							}
+						}
+						if (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_A))
+						{
+							if (player.worldPosition.x <= 0)
+							{
+
+							}
+							else
+							{
+								player.worldPosition.x -= (deltaTime * PLAYER_SPEED);
+							}
+
+						}
+
+						if (IsKeyDown(KEY_SPACE))
+						{
+							if (!hasShot)
+							{
+								hasShot = true;
+								firstShot = true;
+								playerShot.worldPosition.x = player.worldPosition.x + (player.texture.width / 2) - (playerShot.texture.width / 2);
+								playerShot.worldPosition.y = player.worldPosition.y - (playerShot.texture.height / 2);
+								PlaySound(shootfx);
+							}
+
+						}
+
+						if (IsKeyPressed(KEY_ESCAPE))///if escape key is pressed
+						{
+							CloseWindow(); //close the game window
+							game = false; //end the loop
+						}
+
 					}
-				
-
-
-
-
-				if (!explode.isDead)
-				{
-					count++; //calculate the amount of time the explosion has been on screen
-					if (count > LENGTH) //if the explosion has been on for longert then LENGTH
-					{
-						explode.isDead = true; //set is dead to true so explosion will stop drawing
-						count = 0; // reset counter
-					}
-					explode.Draw();
 				}
-
-				//if (!enemy.isDead)
-				//{
-				//	if (goRight)
-				//	{
-				//		enemy.worldPosition.x += (deltaTime * ENEMY_SPEED);
-
-				//		if (enemy.worldPosition.x + (enemy.texture.width / 2) >= GetScreenWidth())
-				//		{
-				//			enemy.worldPosition.y += ((deltaTime * ENEMY_SPEED) * 2);
-				//			goRight = false;
-				//		}
-				//	}
-				//	if (!goRight)
-				//	{
-				//		enemy.worldPosition.x -= (deltaTime * ENEMY_SPEED);
-				//		if (enemy.worldPosition.x <= 0)
-				//		{
-				//			enemy.worldPosition.y += ((deltaTime * ENEMY_SPEED) * 2);
-				//			goRight = true;
-				//		}
-				//	}
-
-				//	enemy.Box.DebugBox(GREEN);
-				//	enemy.Draw();
-				//}	
-
-
-				DrawText(TextFormat("Scrap: %05i", scrap), 10, 10, 20, WHITE);
-				EndDrawing();
-
-				/////////////////////////////////////////////////////
-				///Get User Inpiut
-				/////////////////////////////////////////////////////
-
-				if (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D))
-				{
-					if (player.worldPosition.x + player.texture.width >= GetScreenWidth())
-					{
-
-					}
-					else
-					{
-						player.worldPosition.x += (deltaTime * PLAYER_SPEED);
-					}
-				}
-				if (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_A))
-				{
-					if (player.worldPosition.x <= 0)
-					{
-
-					}
-					else
-					{
-						player.worldPosition.x -= (deltaTime * PLAYER_SPEED);
-					}
-
-				}
-
-				if (IsKeyDown(KEY_SPACE))
-				{
-					if (!hasShot)
-					{
-						hasShot = true;
-						firstShot = true;
-						playerShot.worldPosition.x = player.worldPosition.x + (player.texture.width / 2) - (playerShot.texture.width / 2);
-						playerShot.worldPosition.y = player.worldPosition.y - (playerShot.texture.height / 2);
-						PlaySound(shootfx);
-					}
-
-				}
-
-				if (IsKeyPressed(KEY_ESCAPE))///if escape key is pressed
-				{
-					CloseWindow(); //close the game window
-					game = false; //end the loop
-				}
-
-			}
 			
 	
 }
@@ -741,7 +669,7 @@ void Upgrade(bool &paused, int &scrap, bool &shootThrough)
 
 	while (!Upgraded)
 	{
-		//paused = true;
+		paused = true;
 		BeginDrawing();	
 
 		ClearBackground(BLACK);
@@ -753,7 +681,7 @@ void Upgrade(bool &paused, int &scrap, bool &shootThrough)
 		{
 			Upgraded = true;
 		}
-		if (IsKeyPressed(KEY_ONE))///if escape key is pressed
+		if (IsKeyPressed(KEY_ONE))///if 1 is pressed
 		{
 			shootThrough = true;
 			scrap -= 500;
