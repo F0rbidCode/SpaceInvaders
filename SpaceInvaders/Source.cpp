@@ -15,7 +15,7 @@ void Reset(vector<vector<Actor>> &enemies, vector<vector<Barriers>> &barrier1, v
 void GameOver(int scrap);
 void GameWin(int scrap);
 
-void Upgrade(bool& paused, int &scrap, bool& shootThrough);
+void Upgrade(int &scrap, bool &shootThrough, bool &trippleShot);
 
 
 
@@ -68,6 +68,7 @@ void main()
 			Actor playerShot; //initialise a bullet for the player
 			const float SHOT_SPEED = 400; //set the speeds of shots
 			bool hasShot = false; //initialise a bool to determin if the player has shot
+			playerShot.isDead = true;
 			bool firstShot = false;
 			playerShot.image = LoadImage("laserBlue01.png");
 			playerShot.texture = LoadTextureFromImage(playerShot.image);
@@ -75,7 +76,14 @@ void main()
 
 
 		//initialise variables used for player uppgrades
-			bool shootThrough = false;
+			bool shootThrough = false; //enables the main bullet to continue after hitting an object
+			bool trippleShot = false; //adds 2 aditional bullets
+
+			pair<Actor, Actor> extraShots;
+
+			//extraShots.first = playerShot;			
+			extraShots.first = playerShot;
+			extraShots.second = playerShot;
 			
 
 		////Initialise Enemies
@@ -253,18 +261,19 @@ void main()
 					{
 						kills = 0; //reset kills to 0 for next wave
 						enemySpeedUp = 1; //reset the speed boost to enemies
+						hasShot = false;
+						EnemyHasShot = false;
 
 						paused = true; //pause the game
 						if (paused)
 						{
 
-							Upgrade(paused, scrap, shootThrough); //load updates
+							Upgrade(scrap, shootThrough, trippleShot); //load updates
 							
 						}
 										
 
-						Reset(enemies, barrier1, barrier2, barrier3); // reset enemy positions
-
+						Reset(enemies, barrier1, barrier2, barrier3); // reset enemy positions						
 					}
 
 					/////////////////////////////////////////////
@@ -363,12 +372,13 @@ void main()
 						}
 
 						//check if the player has shot
-						if (hasShot)
+						if (!playerShot.isDead)
 						{
 							/////////////////////
 							//Move the shot
 							/////////////////////
 							playerShot.worldPosition.y -= (deltaTime * SHOT_SPEED); //continue to move the shot up the screen every frame
+							
 
 
 							////////////////////////////////////
@@ -376,7 +386,7 @@ void main()
 							////////////////////////////////////
 							if (playerShot.worldPosition.y <= 0) //if the players shot goes past the top of the screen
 							{
-								hasShot = false; //set has shot to false
+								playerShot.isDead = true; //set has shot to false
 							}
 
 							/*if (enemy.Box.Overlaps(playerShot.worldPosition))
@@ -405,9 +415,10 @@ void main()
 										kills++;
 										if (!shootThrough)
 										{
-											hasShot = false;
+											playerShot.isDead = true;
 										}
 									}
+									
 								}
 							}
 
@@ -428,9 +439,9 @@ void main()
 											barrier1[i][j].worldPosition.x = -100;
 											if (!shootThrough)
 											{
-												hasShot = false;
+												playerShot.isDead = true;
 											}
-										}
+										}										
 									}
 								}
 							}
@@ -448,9 +459,10 @@ void main()
 											barrier2[i][j].worldPosition.x = -100;
 											if (!shootThrough)
 											{
-												hasShot = false;
+												playerShot.isDead = true;
 											}
-										}
+										}									
+										
 									}
 								}
 							}
@@ -468,14 +480,183 @@ void main()
 											barrier3[i][j].worldPosition.x = -100;
 											if (!shootThrough)
 											{
-												hasShot = false;
+												playerShot.isDead = true;
 											}
 										}
-									}
+									}									
 								}
 							}
 						}
 
+						//////////////////////////
+						///Tripple Shot Movement
+						/////////////////////////
+						if (trippleShot)
+						{
+							if (!extraShots.first.isDead)
+							{
+								extraShots.first.worldPosition.y -= (deltaTime * SHOT_SPEED); //continue to move the shot up the screen every frame
+							}
+							if (!extraShots.second.isDead)
+							{
+								extraShots.second.worldPosition.y -= (deltaTime * SHOT_SPEED); //continue to move the shot up the screen every frame
+							}
+
+							////////////////////////////////////////////
+							///////Tripple Shot Collisions
+							////////////////////////////////////////////
+						
+							if (trippleShot)
+							{
+								//check if extra shots are of screen
+								if (extraShots.first.worldPosition.y < 0)
+								{
+									extraShots.first.isDead = true;
+								}
+								if (extraShots.second.worldPosition.y < 0)
+								{
+									extraShots.second.isDead = true;
+								}
+
+								///////////////////////////////////////
+								///////Enemy Collisions
+								///////////////////////////////////////
+								for (int i = 0; i < EN_ROWS; i++)
+								{
+									for (int j = 0; j < EN_COLS; j++)
+									{
+										if (enemies[i][j].Box.Overlaps(extraShots.first.worldPosition))
+										{
+											explode.worldPosition.x = enemies[i][j].worldPosition.x + (enemies[i][j].texture.width * enemies[i][j].scale) / 2;
+											explode.worldPosition.y = enemies[i][j].worldPosition.y + (enemies[i][j].texture.height * enemies[i][j].scale) / 2;
+											explode.isDead = false;
+											enemies[i][j].isDead = true;
+											enemySpeedUp += 0.05;
+											enemies[i][j].worldPosition.x = -100;
+											enemies[i][j].worldPosition.y = -1000000;
+											PlaySound(boom);
+											scrap += scrapPerKill;
+											kills++;
+
+											extraShots.first.worldPosition.y = -100;
+											extraShots.second.isDead;
+										}
+
+										if (enemies[i][j].Box.Overlaps(extraShots.second.worldPosition))
+										{
+											explode.worldPosition.x = enemies[i][j].worldPosition.x + (enemies[i][j].texture.width * enemies[i][j].scale) / 2;
+											explode.worldPosition.y = enemies[i][j].worldPosition.y + (enemies[i][j].texture.height * enemies[i][j].scale) / 2;
+											explode.isDead = false;
+											enemies[i][j].isDead = true;
+											enemySpeedUp += 0.05;
+											enemies[i][j].worldPosition.x = -100;
+											enemies[i][j].worldPosition.y = -1000000;
+											PlaySound(boom);
+											scrap += scrapPerKill;
+											kills++;
+
+											extraShots.second.worldPosition.y = -100;
+											extraShots.second.isDead;
+										}
+									}
+								}
+
+								/////////////////////////////////////////
+							//////////Collisions For Barriers
+							/////////////////////////////////////////
+							//Barrier 1 collisions
+								for (int i = 0; i < B_HEIGHT; i++)
+								{
+									for (int j = 0; j < B_LENGTH; j++)
+									{
+										if (!barrier1[i][j].isDead)
+										{
+											if (trippleShot)
+											{
+												if (barrier1[i][j].Box.Overlaps(extraShots.first.worldPosition))
+												{
+													PlaySound(boom);
+													barrier1[i][j].isDead = true;
+													barrier1[i][j].worldPosition.x = -100;
+													extraShots.first.worldPosition.y = -100;
+													extraShots.first.isDead;
+												}
+												if (barrier1[i][j].Box.Overlaps(extraShots.second.worldPosition))
+												{
+													PlaySound(boom);
+													barrier1[i][j].isDead = true;
+													barrier1[i][j].worldPosition.x = -100;
+													extraShots.second.worldPosition.y = -100;
+													extraShots.second.isDead;
+												}
+											}
+										}
+									}
+								}
+								//barrier 2 collision
+								for (int i = 0; i < B_HEIGHT; i++)
+								{
+									for (int j = 0; j < B_LENGTH; j++)
+									{
+										if (!barrier2[i][j].isDead)
+										{
+											
+											if (trippleShot)
+											{
+												if (barrier2[i][j].Box.Overlaps(extraShots.first.worldPosition))
+												{
+													PlaySound(boom);
+													barrier2[i][j].isDead = true;
+													barrier2[i][j].worldPosition.x = -100;
+													extraShots.first.worldPosition.y = -100;
+													extraShots.first.isDead;
+												}
+												if (barrier2[i][j].Box.Overlaps(extraShots.second.worldPosition))
+												{
+													PlaySound(boom);
+													barrier2[i][j].isDead = true;
+													barrier2[i][j].worldPosition.x = -100;
+													extraShots.second.worldPosition.y = -100;
+													extraShots.second.isDead;
+												}
+											}
+										}
+									}
+								}
+								//barreir 3 collision
+								for (int i = 0; i < B_HEIGHT; i++)
+								{
+									for (int j = 0; j < B_LENGTH; j++)
+									{
+										if (!barrier3[i][j].isDead)
+										{
+
+											if (trippleShot)
+											{
+												if (barrier3[i][j].Box.Overlaps(extraShots.first.worldPosition))
+												{
+													PlaySound(boom);
+													barrier3[i][j].isDead = true;
+													barrier3[i][j].worldPosition.x = -100;
+													extraShots.first.worldPosition.y = -100;
+													extraShots.first.isDead;
+												}
+												if (barrier3[i][j].Box.Overlaps(extraShots.second.worldPosition))
+												{
+													PlaySound(boom);
+													barrier3[i][j].isDead = true;
+													barrier3[i][j].worldPosition.x = -100;
+													extraShots.second.worldPosition.y = -100;
+													extraShots.second.isDead;
+												}
+											}
+										}
+									}
+								}
+
+
+							}
+						}
 						////////////////////////////
 						//////Enemy Movement
 						////////////////////////////
@@ -553,14 +734,33 @@ void main()
 
 						if (IsKeyDown(KEY_SPACE))
 						{
-							if (!hasShot)
+							if (playerShot.isDead)
 							{
-								hasShot = true;
+								playerShot.isDead = false;
 								firstShot = true;
 								playerShot.worldPosition.x = player.worldPosition.x + (player.texture.width / 2) - (playerShot.texture.width / 2);
 								playerShot.worldPosition.y = player.worldPosition.y - (playerShot.texture.height / 2);
 								PlaySound(shootfx);
+
+								
+								if (trippleShot)
+								{
+									if (extraShots.first.isDead)
+									{
+										extraShots.first.isDead = false;
+										extraShots.first.worldPosition.x = player.worldPosition.x + (playerShot.texture.width / 2);
+										extraShots.first.worldPosition.y = player.worldPosition.y + (playerShot.texture.height * playerShot.scale);
+									}
+
+									if (extraShots.second.isDead)
+									{
+										extraShots.second.isDead = false;
+										extraShots.second.worldPosition.x = (player.worldPosition.x + player.texture.width) - (playerShot.texture.width / 2);
+										extraShots.second.worldPosition.y = player.worldPosition.y + (playerShot.texture.height * playerShot.scale);
+									}
+								}
 							}
+
 
 						}
 
@@ -631,11 +831,22 @@ void main()
 					/////////////////////////////////////////
 					//////Draw Players Shot
 					/////////////////////////////////////////
-					if (hasShot) //check if the player has shot
+					if (!playerShot.isDead) //check if the player has shot
 					{
 						
 						playerShot.Draw();					
 
+					}
+					if (trippleShot)
+					{
+						if (!extraShots.first.isDead)
+						{
+							extraShots.first.Draw();
+						}
+						if (!extraShots.second.isDead)
+						{
+							extraShots.second.Draw();
+						}
 					}
 
 
@@ -695,19 +906,24 @@ void main()
 
 
 						DrawText(TextFormat("Scrap: %05i", scrap), 10, 10, 20, WHITE);
+
+						if (paused)
+						{
+							DrawText("PAUSED", (GetScreenWidth() / 2) - (MeasureText("PAUSED", 50) / 2), GetScreenHeight() / 2, 50, RED);
+							DrawText("Press P To Continue", (GetScreenWidth() / 2) - (MeasureText("Press P To Continue", 30) / 2), GetScreenHeight() / 2 + 70, 30, RED);
+						}
 						EndDrawing();				
 										
 				}		
 	
 }
 
-void Upgrade(bool &paused, int &scrap, bool &shootThrough)
+void Upgrade(int &scrap, bool &shootThrough, bool &trippleShot)
 {
 	bool Upgraded = false;
 
 	while (!Upgraded)
-	{
-		paused = true;
+	{		
 		BeginDrawing();	
 
 		ClearBackground(BLACK);
@@ -715,19 +931,37 @@ void Upgrade(bool &paused, int &scrap, bool &shootThrough)
 		DrawText(TextFormat("Scrap: %05i", scrap), (GetScreenWidth() / 2) - 50, 10, 30, WHITE);
 		DrawText("Press Esc To Skip", 10, 30, 30, WHITE);
 		DrawText("Press 1 to Get Shoot Through Upgrade (500 Scrap)", 10, 100, 30, WHITE);
+		DrawText("Press 2 to Get Tripple Shot Upgrade (500 Scrap)", 10, 150, 30, WHITE);
 		if (IsKeyPressed(KEY_ESCAPE))///if escape key is pressed
 		{
 			Upgraded = true;
+			
 		}
-		if (IsKeyPressed(KEY_ONE))///if 1 is pressed
+		if (scrap > 500)
 		{
-			shootThrough = true;
-			scrap -= 500;
-			Upgraded = true;
+			if (IsKeyPressed(KEY_ONE))///if 1 is pressed
+			{
+				shootThrough = true;
+				scrap -= 500;
+				Upgraded = true;
+
+			}
+			if (IsKeyPressed(KEY_TWO))///if 2 is pressed
+			{
+				trippleShot = true;
+				scrap -= 500;
+				Upgraded = true;
+
+			}
+		}
+		else
+		{
+			DrawText("Sorry, you do not have enough scrap", 10, GetScreenHeight() - 100, 30, WHITE);
 		}
 
-		EndDrawing();
+		EndDrawing();		
 	}	
+	
 }
 
 void Reset(vector<vector<Actor>> &enemies, vector<vector<Barriers>> &barrier1, vector<vector<Barriers>> &barrier2, vector<vector<Barriers>> &barrier3)
