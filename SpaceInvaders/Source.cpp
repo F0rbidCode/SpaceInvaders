@@ -233,20 +233,31 @@ void main()
 	//////////////////////////////////////////////
 			
 				while (game)
-				{
+				{				
+
 					///////////////////////////////////////////////////////
 					/////UPDATE
 					//////////////////////////////////////////////////////
 
+
+					//calculate delta time
+					previousTime = currentTime;
+					currentTime = GetTime();
+					deltaTime = (currentTime - previousTime);
+
+
+					/////////////////////////////////////////////
+					//////Check If Player Has Killed All Enemies
+					/////////////////////////////////////////////
 					if (kills == (EN_ROWS * EN_COLS))
 					{
 						kills = 0; //reset kills to 0 for next wave
-						enemySpeedUp = 1;
+						enemySpeedUp = 1; //reset the speed boost to enemies
 
-						paused = true;
+						paused = true; //pause the game
 						while (paused)
 						{
-							Upgrade(paused, scrap, shootThrough);
+							Upgrade(paused, scrap, shootThrough); //load updates
 						}
 						
 
@@ -254,25 +265,26 @@ void main()
 
 					}
 
+					/////////////////////////////////////////////
+					/////Check if player is dead
+					/////////////////////////////////////////////
 					if (player.isDead)
 					{
 						game = false;
 						GameOver(scrap);
 					}
-					//calculate delta time
-					previousTime = currentTime;
-					currentTime = GetTime();
-					deltaTime = (currentTime - previousTime);
-
+					
+					/////////////////////////////////////////////
+					/////Fit AABBs
+					/////////////////////////////////////////////
 
 					//calculate the new x and y position of the lower right corner of player sprite
 					playerMax.x = player.worldPosition.x + (player.texture.width * player.scale);
 					playerMax.y = player.worldPosition.y + (player.texture.height * player.scale);
 
-					////calculate the new x and y positios of the lower right corner of the enemy
-					//enemy.Max.x = enemy.worldPosition.x + (enemy.texture.width * enemy.scale);
-					//enemy.Max.y = enemy.worldPosition.y + (enemy.texture.height * enemy.scale);
-
+					//refit AABBs
+					player.Box.Fit(player.worldPosition, playerMax);					
+					//refit enemey AABBs
 					for (int i = 0; i < EN_ROWS; i++)
 					{
 						for (int j = 0; j < EN_COLS; j++)
@@ -286,8 +298,9 @@ void main()
 						}
 					}
 
-					//refit AABBs
-					player.Box.Fit(player.worldPosition, playerMax);
+					////calculate the new x and y positios of the lower right corner of the enemy
+					//enemy.Max.x = enemy.worldPosition.x + (enemy.texture.width * enemy.scale);
+					//enemy.Max.y = enemy.worldPosition.y + (enemy.texture.height * enemy.scale);
 					//enemy.Box.Fit(enemy.worldPosition, enemy.Max);
 
 						////////////////////////////////////////
@@ -328,7 +341,8 @@ void main()
 						}
 					}
 
-					if (!firstShot)
+					///check for special win cindition
+					if (!firstShot) 
 					{
 						for (int i = 0; i < EN_ROWS; i++)
 						{
@@ -344,7 +358,8 @@ void main()
 						}
 					}
 
-					if (hasShot) //check if the player has shot
+					//check if the player has shot
+					if (hasShot) 
 					{
 						/////////////////////
 						//Move the shot
