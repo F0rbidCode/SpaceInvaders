@@ -19,8 +19,8 @@ void Upgrade(int &scrap, bool &shootThrough, bool &trippleShot);
 
 
 
-static const int EN_COLS = 1; //number of collums of enemies
-static const int EN_ROWS = 1; //number of rows of enemies
+static const int EN_COLS = 11; //number of collums of enemies
+static const int EN_ROWS = 5; //number of rows of enemies
 static const int B_LENGTH = 20; //the length pf each barrier
 static const int B_HEIGHT = 10; //the height of each barrier
 
@@ -32,7 +32,7 @@ void main()
 
 			bool game = true; //set game to true to start gameloop
 			bool paused = false;
-			int scrap = 500; //scrap is used to represent score and as a currency for upgrades
+			int scrap = 0; //scrap is used to represent score and as a currency for upgrades
 			int scrapPerKill = 10; //used to set the scrap earnt per kill
 
 			int screenWidth = 1920; // set the width of the screen
@@ -561,7 +561,7 @@ void main()
 									}
 								}
 
-								/////////////////////////////////////////
+							/////////////////////////////////////////
 							//////////Collisions For Barriers
 							/////////////////////////////////////////
 							//Barrier 1 collisions
@@ -656,6 +656,94 @@ void main()
 
 
 							}
+						}
+
+						///////////////////////////////////////
+						/////Enemy Shot Movement And Collisions
+						///////////////////////////////////////
+						if (EnemyHasShot)
+						{
+							enemyShot.worldPosition.y += (deltaTime * ENEMY_SHOT_SPEED);
+							if (enemyShot.worldPosition.y >= GetScreenHeight())
+							{
+								EnemyHasShot = false;
+							}
+							
+							///////////////////////////////////////////////////
+							//////Collision for player
+							///////////////////////////////////////////////////
+							if (player.Box.Overlaps(enemyShot.worldPosition)) //check if player gets hit
+							{
+								PlaySound(boom); //play sound
+								player.isDead = true; //set player to dead
+								player.worldPosition.x = -100; //moove player off screen
+								EnemyHasShot = false;
+							}
+
+							/////////////////////////////////////////
+							//////////Collisions For Barriers
+							/////////////////////////////////////////
+							//Barrier 1 collisions
+							for (int i = 0; i < B_HEIGHT; i++)
+							{
+								for (int j = 0; j < B_LENGTH; j++)
+								{
+									if (!barrier1[i][j].isDead)
+									{
+										if (barrier1[i][j].Box.Overlaps(enemyShot.worldPosition))
+										{
+											PlaySound(boom);
+											barrier1[i][j].isDead = true;
+											barrier1[i][j].worldPosition.x = -100;
+											if (!shootThrough)
+											{
+												EnemyHasShot = false;
+											}
+										}
+									}
+								}
+							}
+							//barrier 2 collision
+							for (int i = 0; i < B_HEIGHT; i++)
+							{
+								for (int j = 0; j < B_LENGTH; j++)
+								{
+									if (!barrier2[i][j].isDead)
+									{
+										if (barrier2[i][j].Box.Overlaps(enemyShot.worldPosition))
+										{
+											PlaySound(boom);
+											barrier2[i][j].isDead = true;
+											barrier2[i][j].worldPosition.x = -100;
+											if (!shootThrough)
+											{
+												EnemyHasShot = false;
+											}
+										}
+									}
+								}
+							}
+							//barreir 3 collision
+							for (int i = 0; i < B_HEIGHT; i++)
+							{
+								for (int j = 0; j < B_LENGTH; j++)
+								{
+									if (!barrier3[i][j].isDead)
+									{
+										if (barrier3[i][j].Box.Overlaps(enemyShot.worldPosition))
+										{
+											PlaySound(boom);
+											barrier3[i][j].isDead = true;
+											barrier3[i][j].worldPosition.x = -100;
+											if (!shootThrough)
+											{
+												EnemyHasShot = false;
+											}
+										}
+									}
+								}
+							}
+
 						}
 						////////////////////////////
 						//////Enemy Movement
@@ -766,7 +854,7 @@ void main()
 
 						if (IsKeyPressed(KEY_ESCAPE))///if escape key is pressed
 						{
-							CloseWindow(); //close the game window
+							
 							game = false; //end the loop
 						}
 					}
@@ -864,6 +952,15 @@ void main()
 							}
 						}
 					}
+
+					/////////////////////////////////
+					///////Draw Enemy Shot
+					////////////////////////////////
+					if (EnemyHasShot)
+					{
+						enemyShot.Draw();
+					}
+
 					///////////////////////////////////////
 					/////Draw Explode icon
 					///////////////////////////////////////
@@ -914,8 +1011,14 @@ void main()
 						}
 						EndDrawing();				
 										
-				}		
-	
+				}	
+				////////////////////////
+				////Exit
+				////////////////////////
+				if (!game)
+				{
+					CloseWindow(); //close the game window
+				}
 }
 
 void Upgrade(int &scrap, bool &shootThrough, bool &trippleShot)
