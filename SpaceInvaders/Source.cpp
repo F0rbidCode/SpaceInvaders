@@ -15,7 +15,7 @@ void Reset(vector<vector<Actor>> &enemies, vector<vector<Barriers>> &barrier1, v
 void GameOver(int scrap);
 void GameWin(int scrap);
 
-void Upgrade(int &scrap, bool &shootThrough, bool &trippleShot, float &playerSpeedBoost);
+void Upgrade(int &scrap, bool &shootThrough, bool &trippleShot, float &playerSpeedBoost, float &shootSpeedBoost);
 
 
 
@@ -79,6 +79,7 @@ void main()
 			bool shootThrough = false; //enables the main bullet to continue after hitting an object
 			bool trippleShot = false; //adds 2 aditional bullets
 			float playerSpeedBoost = 1.0; //used to increase the players speed
+			float shootSpeedBoost = 1.0; //used to increase the players shoot speed
 
 			pair<Actor, Actor> extraShots; //create a pair to hold the extra shots from upgrade
 
@@ -277,7 +278,7 @@ void main()
 						if (paused)
 						{
 
-							Upgrade(scrap, shootThrough, trippleShot, playerSpeedBoost); //load updates
+							Upgrade(scrap, shootThrough, trippleShot, playerSpeedBoost, shootSpeedBoost); //load updates
 							
 						}
 										
@@ -387,7 +388,7 @@ void main()
 							/////////////////////
 							//Move the shot
 							/////////////////////
-							playerShot.worldPosition.y -= (deltaTime * SHOT_SPEED); //continue to move the shot up the screen every frame
+							playerShot.worldPosition.y -= ((deltaTime * SHOT_SPEED)) * shootSpeedBoost; //continue to move the shot up the screen every frame
 							
 
 
@@ -1031,7 +1032,7 @@ void main()
 				}
 }
 
-void Upgrade(int &scrap, bool &shootThrough, bool &trippleShot, float& playerSpeedBoost)
+void Upgrade(int &scrap, bool &shootThrough, bool &trippleShot, float& playerSpeedBoost, float &shootSpeedBoost)
 {
 	bool Upgraded = false;
 
@@ -1046,6 +1047,7 @@ void Upgrade(int &scrap, bool &shootThrough, bool &trippleShot, float& playerSpe
 		DrawText("Press 1 to Get Shoot Through Upgrade (500 Scrap)", 10, 100, 30, WHITE);
 		DrawText("Press 2 to Get Tripple Shot Upgrade (500 Scrap)", 10, 150, 30, WHITE);
 		DrawText("Press 3 to Get Movement Speed Upgrade (500 Scrap)", 10, 200, 30, WHITE);
+		DrawText("Press 4 to Get Bullet Speed Upgrade (500 Scrap)", 10, 250, 30, WHITE);
 		if (IsKeyPressed(KEY_ESCAPE))///if escape key is pressed
 		{
 			Upgraded = true;
@@ -1070,6 +1072,13 @@ void Upgrade(int &scrap, bool &shootThrough, bool &trippleShot, float& playerSpe
 			if (IsKeyPressed(KEY_THREE))///if 2 is pressed
 			{
 				playerSpeedBoost += 0.1;
+				scrap -= 500;
+				Upgraded = true;
+
+			}
+			if (IsKeyPressed(KEY_FOUR))///if 2 is pressed
+			{
+				shootSpeedBoost += 0.1;
 				scrap -= 500;
 				Upgraded = true;
 
