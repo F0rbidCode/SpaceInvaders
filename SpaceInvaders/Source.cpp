@@ -79,7 +79,7 @@ void main()
 			bool shootThrough = false; //enables the main bullet to continue after hitting an object
 			bool trippleShot = false; //adds 2 aditional bullets
 
-			pair<Actor, Actor> extraShots;
+			pair<Actor, Actor> extraShots; //create a pair to hold the extra shots from upgrade
 
 			//extraShots.first = playerShot;			
 			extraShots.first = playerShot;
@@ -119,6 +119,7 @@ void main()
 			Actor enemyShot;
 			const float ENEMY_SHOT_SPEED = 200; //set the speed of enemy shots
 			float enemySpeedUp = 1;
+			float levelUp = 0;
 			bool EnemyHasShot = false;//set enemy has shot to false to enable them to shoot
 			enemyShot.scale = 0.5; // set scale of enemy shot sprite
 
@@ -261,8 +262,15 @@ void main()
 					{
 						kills = 0; //reset kills to 0 for next wave
 						enemySpeedUp = 1; //reset the speed boost to enemies
+						levelUp = levelUp + 0.01; //incrase the modifier for each time you pass a level
+						enemySpeedUp = enemySpeedUp + levelUp; //increase the enemies speed each new level
 						hasShot = false;
 						EnemyHasShot = false;
+						if (trippleShot)
+						{
+							extraShots.first.isDead = true;
+							extraShots.second.isDead = true;
+						}
 
 						paused = true; //pause the game
 						if (paused)
