@@ -67,7 +67,7 @@ void main()
 		///Initialise Player Shot
 			Actor playerShot; //initialise a bullet for the player
 			const float SHOT_SPEED = 400; //set the speeds of shots
-			bool hasShot = false; //initialise a bool to determin if the player has shot
+			
 			playerShot.isDead = true;
 			bool firstShot = false;
 			playerShot.image = LoadImage("laserBlue01.png");
@@ -266,7 +266,7 @@ void main()
 						enemySpeedUp = 1; //reset the speed boost to enemies
 						levelUp = levelUp + 0.2; //incrase the modifier for each time you pass a level
 						enemySpeedUp = enemySpeedUp + levelUp; //increase the enemies speed each new level
-						hasShot = false;
+						playerShot.isDead = true;
 						EnemyHasShot = false;
 						if (trippleShot)
 						{
