@@ -457,10 +457,55 @@ void main()
 						}
 					}
 
+					////////////////////////////
+					//////Enemy Movement
+					////////////////////////////
+					for (int i = 0; i < EN_ROWS; i++)
+					{
+						for (int j = 0; j < EN_COLS; j++)
+						{
+							if (!enemies[i][j].isDead)
+							{
+								if (goRight)
+								{
+									enemies[i][j].worldPosition.x += ((deltaTime * ENEMY_SPEED) * enemySpeedUp);
+
+									if (enemies[i][j].worldPosition.x + (enemies[i][j].texture.width / 2) >= GetScreenWidth())
+									{
+										for (int i = 0; i < EN_ROWS; i++)
+										{
+											for (int j = 0; j < EN_COLS; j++)
+											{
+												enemies[i][j].worldPosition.y += ((deltaTime * ENEMY_SPEED) * 10);
+												goRight = false;
+											}
+										}
+									}
+								}
+								if (!goRight)
+								{
+									enemies[i][j].worldPosition.x -= ((deltaTime * ENEMY_SPEED) * enemySpeedUp);
+									if (enemies[i][j].worldPosition.x <= 0)
+									{
+										for (int i = 0; i < EN_ROWS; i++)
+										{
+											for (int j = 0; j < EN_COLS; j++)
+											{
+												enemies[i][j].worldPosition.y += ((deltaTime * ENEMY_SPEED) * 10);
+												goRight = true;
+											}
+										}
+									}
+								}
+
+							}
+						}
+					}
 
 					/////////////////////////////////////////////////
 					///// Draw
 					////////////////////////////////////////////////
+
 					BeginDrawing();
 
 					ClearBackground(BLACK);
@@ -502,13 +547,17 @@ void main()
 							}
 						}
 					}
-
+					//////////////////////////////////////////
+					//////Draw Player
+					/////////////////////////////////////////
 					if (!player.isDead)
 					{
 						//player.Box.DebugBox(RED);
 						player.Draw();
 					}
-
+					/////////////////////////////////////////
+					//////Draw Players Shot
+					/////////////////////////////////////////
 					if (hasShot) //check if the player has shot
 					{
 						
@@ -518,47 +567,14 @@ void main()
 
 
 					////////////////////////////
-					//////Enemy Movement
+					//////Draw Enemy
 					////////////////////////////
-
 					for (int i = 0; i < EN_ROWS; i++)
 					{
 						for (int j = 0; j < EN_COLS; j++)
 						{
 							if (!enemies[i][j].isDead)
 							{
-								if (goRight)
-								{
-									enemies[i][j].worldPosition.x += ((deltaTime * ENEMY_SPEED) * enemySpeedUp);
-
-									if (enemies[i][j].worldPosition.x + (enemies[i][j].texture.width / 2) >= GetScreenWidth())
-									{
-										for (int i = 0; i < EN_ROWS; i++)
-										{
-											for (int j = 0; j < EN_COLS; j++)
-											{
-												enemies[i][j].worldPosition.y += ((deltaTime * ENEMY_SPEED) * 10);
-												goRight = false;
-											}
-										}
-									}
-								}
-								if (!goRight)
-								{
-									enemies[i][j].worldPosition.x -= ((deltaTime * ENEMY_SPEED) * enemySpeedUp);
-									if (enemies[i][j].worldPosition.x <= 0)
-									{
-										for (int i = 0; i < EN_ROWS; i++)
-										{
-											for (int j = 0; j < EN_COLS; j++)
-											{
-												enemies[i][j].worldPosition.y += ((deltaTime * ENEMY_SPEED) * 10);
-												goRight = true;
-											}
-										}
-									}
-								}
-
 								//enemies[i][j].Box.DebugBox(GREEN);
 								enemies[i][j].Draw();
 							}
