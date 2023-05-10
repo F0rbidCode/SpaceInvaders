@@ -15,7 +15,7 @@ void Reset(vector<vector<Actor>> &enemies, vector<vector<Barriers>> &barrier1, v
 void GameOver(int scrap);
 void GameWin(int scrap);
 
-void Upgrade(int &scrap, bool &shootThrough, bool &trippleShot);
+void Upgrade(int &scrap, bool &shootThrough, bool &trippleShot, float &playerSpeedBoost);
 
 
 
@@ -78,6 +78,7 @@ void main()
 		//initialise variables used for player uppgrades
 			bool shootThrough = false; //enables the main bullet to continue after hitting an object
 			bool trippleShot = false; //adds 2 aditional bullets
+			float playerSpeedBoost = 1.0; //used to increase the players speed
 
 			pair<Actor, Actor> extraShots; //create a pair to hold the extra shots from upgrade
 
@@ -262,7 +263,7 @@ void main()
 					{
 						kills = 0; //reset kills to 0 for next wave
 						enemySpeedUp = 1; //reset the speed boost to enemies
-						levelUp = levelUp + 0.01; //incrase the modifier for each time you pass a level
+						levelUp = levelUp + 0.2; //incrase the modifier for each time you pass a level
 						enemySpeedUp = enemySpeedUp + levelUp; //increase the enemies speed each new level
 						hasShot = false;
 						EnemyHasShot = false;
@@ -276,12 +277,13 @@ void main()
 						if (paused)
 						{
 
-							Upgrade(scrap, shootThrough, trippleShot); //load updates
+							Upgrade(scrap, shootThrough, trippleShot, playerSpeedBoost); //load updates
 							
 						}
 										
 
-						Reset(enemies, barrier1, barrier2, barrier3); // reset enemy positions						
+						Reset(enemies, barrier1, barrier2, barrier3); // reset enemy positions		
+						cout << enemySpeedUp << endl;
 					}
 
 					/////////////////////////////////////////////
@@ -812,7 +814,7 @@ void main()
 							}
 							else
 							{
-								player.worldPosition.x += (deltaTime * PLAYER_SPEED);
+								player.worldPosition.x += ((deltaTime * PLAYER_SPEED)) * playerSpeedBoost;
 							}
 						}
 						if (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_A))
@@ -823,7 +825,7 @@ void main()
 							}
 							else
 							{
-								player.worldPosition.x -= (deltaTime * PLAYER_SPEED);
+								player.worldPosition.x -= ((deltaTime * PLAYER_SPEED)) * playerSpeedBoost;
 							}
 
 						}
@@ -1029,7 +1031,7 @@ void main()
 				}
 }
 
-void Upgrade(int &scrap, bool &shootThrough, bool &trippleShot)
+void Upgrade(int &scrap, bool &shootThrough, bool &trippleShot, float& playerSpeedBoost)
 {
 	bool Upgraded = false;
 
@@ -1043,6 +1045,7 @@ void Upgrade(int &scrap, bool &shootThrough, bool &trippleShot)
 		DrawText("Press Esc To Skip", 10, 30, 30, WHITE);
 		DrawText("Press 1 to Get Shoot Through Upgrade (500 Scrap)", 10, 100, 30, WHITE);
 		DrawText("Press 2 to Get Tripple Shot Upgrade (500 Scrap)", 10, 150, 30, WHITE);
+		DrawText("Press 3 to Get Movement Speed Upgrade (500 Scrap)", 10, 200, 30, WHITE);
 		if (IsKeyPressed(KEY_ESCAPE))///if escape key is pressed
 		{
 			Upgraded = true;
@@ -1060,6 +1063,13 @@ void Upgrade(int &scrap, bool &shootThrough, bool &trippleShot)
 			if (IsKeyPressed(KEY_TWO))///if 2 is pressed
 			{
 				trippleShot = true;
+				scrap -= 500;
+				Upgraded = true;
+
+			}
+			if (IsKeyPressed(KEY_THREE))///if 2 is pressed
+			{
+				playerSpeedBoost += 0.1;
 				scrap -= 500;
 				Upgraded = true;
 
