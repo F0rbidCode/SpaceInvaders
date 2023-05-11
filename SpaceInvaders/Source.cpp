@@ -254,7 +254,9 @@ void main()
 					///////////////////////////////////////////////////////
 					/////UPDATE
 					//////////////////////////////////////////////////////
-
+					// 
+					//update music stream
+					UpdateMusicStream(music);
 
 					//calculate delta time
 					previousTime = currentTime;
