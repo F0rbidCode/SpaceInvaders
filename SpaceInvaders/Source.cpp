@@ -12,8 +12,8 @@ using namespace std;
 //prototype Setup GameOver and GameWin
 void Reset(vector<vector<Actor>> &enemies, vector<vector<Barriers>> &barrier1, vector<vector<Barriers>> &barrier2, vector<vector<Barriers>> &barrier3);
 
-void GameOver(int scrap);
-void GameWin(int scrap);
+void GameOver(int scrap, bool &game);
+void GameWin(int scrap, bool &game);
 
 void Upgrade(int &scrap, bool &shootThrough, bool &trippleShot, float &playerSpeedBoost, float &shootSpeedBoost);
 
@@ -53,7 +53,7 @@ void main()
 
 		///Initialise player
 			Actor player; //initialise player 
-			player.image = LoadImage("playerShip2_blue.png");
+			player.image = LoadImage(".\\data\\playerShip2_blue.png");
 			player.texture = LoadTextureFromImage(player.image);
 			//set x and y positions of the player
 			player.worldPosition.x = (GetScreenWidth() / 2) - (player.texture.width / 2);
@@ -70,7 +70,7 @@ void main()
 			
 			playerShot.isDead = true;
 			bool firstShot = false;
-			playerShot.image = LoadImage("laserBlue01.png");
+			playerShot.image = LoadImage(".\\data\\laserBlue01.png");
 			playerShot.texture = LoadTextureFromImage(playerShot.image);
 			playerShot.scale = 0.5;
 
@@ -102,14 +102,14 @@ void main()
 
 			//create an array of imiges to load for the enemies
 			vector<Image> images(5);
-			images[0] = LoadImage("enemyBlack1.png");
-			images[1] = LoadImage("enemyBlack2.png");
-			images[2] = LoadImage("enemyBlack3.png");
-			images[3] = LoadImage("enemyBlack4.png");
-			images[4] = LoadImage("enemyBlack5.png");
+			images[0] = LoadImage(".\\data\\enemyBlack1.png");
+			images[1] = LoadImage(".\\data\\enemyBlack2.png");
+			images[2] = LoadImage(".\\data\\enemyBlack3.png");
+			images[3] = LoadImage(".\\data\\enemyBlack4.png");
+			images[4] = LoadImage(".\\data\\enemyBlack5.png");
 
 			//variables to create an array of enemies
-			Image image1 = LoadImage("enemyBlack2.png");
+			Image image1 = LoadImage(".\\data\\enemyBlack2.png");
 			Texture texture1 = LoadTextureFromImage(image1);
 
 			
@@ -130,11 +130,11 @@ void main()
 
 			//create an actor to display explosion
 			Actor explode;
-			explode.image = LoadImage("laserRed08.png");
+			explode.image = LoadImage(".\\data\\laserRed08.png");
 			explode.texture = LoadTextureFromImage(explode.image);
 			int count = 0;
 			const int LENGTH = 15; //amount of time the explode will be displayed		
-			enemyShot.image = LoadImage("laserRed07.png");
+			enemyShot.image = LoadImage(".\\data\\laserRed07.png");
 			enemyShot.texture = LoadTextureFromImage(enemyShot.image);
 			explode.scale = 0.5;
 			
@@ -171,8 +171,12 @@ void main()
 	////////////////////////////////////////////////////////////////
 	///SOUNDS
 	////////////////////////////////////////////////////////////////
-			Sound shootfx = LoadSound("sfx_laser2.ogg");
-			Sound boom = LoadSound("mixkit-pixel-chiptune-explosion-1692.wav");
+			Sound shootfx = LoadSound(".\\data\\sfx_laser2.ogg");
+			Sound boom = LoadSound(".\\data\\mixkit-pixel-chiptune-explosion-1692.wav");
+			Music music = LoadMusicStream(".\\data\\Abstract Vision #3 (Looped).wav");
+			//play the music
+			PlayMusicStream(music);
+			SetMusicVolume(music, 0.25f);
 
     //////////////////////////////
     /// BARRIERS
@@ -245,6 +249,7 @@ void main()
 			
 				while (game)
 				{				
+					
 
 					///////////////////////////////////////////////////////
 					/////UPDATE
@@ -292,8 +297,8 @@ void main()
 					/////////////////////////////////////////////
 					if (player.isDead)
 					{
-						game = false;
-						GameOver(scrap);
+						//game = false;
+						GameOver(scrap, game);
 					}
 					
 					/////////////////////////////////////////////
@@ -358,8 +363,8 @@ void main()
 								{
 									if (enemies[i][j].worldPosition.y + (enemies[i][j].texture.height * enemies[i][j].scale) >= player.worldPosition.y)
 									{
-										game = false;
-										GameOver(scrap);
+										//game = false;
+										GameOver(scrap, game);
 									}
 								}
 							}
@@ -375,8 +380,8 @@ void main()
 									if (enemies[i][j].worldPosition.y + (enemies[i][j].texture.height * enemies[i][j].scale) >= player.worldPosition.y)
 									{
 										scrap += 99999;
-										game = false;
-										GameWin(scrap);
+										//game = false;
+										GameWin(scrap, game);
 									}
 								}
 							}
@@ -1175,11 +1180,9 @@ void Reset(vector<vector<Actor>> &enemies, vector<vector<Barriers>> &barrier1, v
 	}
 }
 
-void GameOver(int scrap)
+void GameOver(int scrap, bool &game)
 {
-	bool esc = false;
-
-	while (!esc)
+	while (game)
 	{
 		BeginDrawing();
 
@@ -1193,22 +1196,20 @@ void GameOver(int scrap)
 
 		if (IsKeyPressed(KEY_ESCAPE))///if escape key is pressed
 		{
-			esc = true; //end the loop
+			game = false; //end the loop
 		}
 		
 	}
 }
 
-void GameWin(int scrap)
+void GameWin(int scrap, bool &game)
 {
-	bool esc = false;
-
-	while (!esc)
+	while (game)
 	{
 		BeginDrawing();
 
 		ClearBackground(BLACK);
-		string message = "The alien ships rach you and you discuss tearms of a treaty. \n They offer to work with you to better the human race. \n They also bring you cake.";
+		string message = "The alien ships reach you and you discuss tearms of a treaty. \n They offer to work with you to better the human race. \n They also bring you cake.";
 
 		DrawText(TextFormat("Scrap: %05i", scrap), (GetScreenWidth() / 2) - 50, 10, 20, WHITE);
 		DrawText(message.c_str(), (GetScreenWidth() / 2) - (MeasureText(message.c_str(), 50) / 2), GetScreenHeight() / 2, 50, WHITE);
@@ -1217,7 +1218,7 @@ void GameWin(int scrap)
 
 		if (IsKeyPressed(KEY_ESCAPE))///if escape key is pressed
 		{			
-			esc = true; //end the loop
+			game = false; //end the loop
 		}
 
 		
