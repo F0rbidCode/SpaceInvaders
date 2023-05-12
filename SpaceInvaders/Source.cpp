@@ -34,11 +34,12 @@ void main()
 			bool paused = false;
 			int scrap = 0; //scrap is used to represent score and as a currency for upgrades
 			int scrapPerKill = 10; //used to set the scrap earnt per kill
+			int kills = 0; //stores the number of kills to determin when level has been cleared
 
 			int screenWidth = 1920; // set the width of the screen
 			int screenHeight = 1080; // set the height of the screen
 
-			int kills = 0; //stores the number of kills to determin when level has been cleared
+			
 
 			InitAudioDevice();
 
