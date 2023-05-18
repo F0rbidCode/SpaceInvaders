@@ -10,6 +10,9 @@ class AABB
 
 
 public:
+	AABB() {}
+	~AABB() {}
+
 	void Fit(Vector2 min, Vector2 max);
 
 	bool Overlaps(Vector2 p);

@@ -5,6 +5,9 @@
 class Actor
 {
 public:
+	Actor() {}
+	~Actor() {}
+
 		Vector2 worldPosition; //used to store world position
 		Vector2 Max;
 		AABB Box; //create an AABB for enemy collisions
