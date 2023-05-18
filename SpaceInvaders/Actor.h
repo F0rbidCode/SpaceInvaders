@@ -5,8 +5,6 @@
 class Actor
 {
 public:
-	Actor() {}
-	~Actor() {}
 
 		Vector2 worldPosition; //used to store world position
 		Vector2 Max;
@@ -16,6 +14,9 @@ public:
 		bool isDead = false; //used to determin if actor is still alive
 		float scale; //used to set the scale of the actor
 		//int count = 0; //used to determing the length of time the explosion stays on the screen
+
+		Actor() {}
+		~Actor() {}
 
 		void Draw();
 		
