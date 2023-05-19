@@ -53,13 +53,14 @@ void main()
 		InitWindow(screenWidth, screenHeight, "Space Invaders");
 
 		///Initialise player
-			Actor player; //initialise player 
-			player.image = LoadImage(".\\data\\playerShip2_blue.png");
-			player.texture = LoadTextureFromImage(player.image);
-			//set x and y positions of the player
-			player.worldPosition.x = (GetScreenWidth() / 2) - (player.texture.width / 2);
-			player.worldPosition.y = (GetScreenHeight() - (player.texture.height * 2));
-			player.scale = 1;
+		Actor player(GetScreenWidth(), GetScreenHeight(), LoadImage(".\\data\\playerShip2_blue.png"), 1);
+			//Actor player; //initialise player 
+			//player.image = LoadImage(".\\data\\playerShip2_blue.png");
+			//player.texture = LoadTextureFromImage(player.image);
+			////set x and y positions of the player
+			//player.worldPosition.x = (GetScreenWidth() / 2) - (player.texture.width / 2);
+			//player.worldPosition.y = (GetScreenHeight() - (player.texture.height * 2));
+			//player.scale = 1;
 
 			Vector2 playerMax; //used to store the lower right position of the player sprite			
 			const float PLAYER_SPEED = 200.00; //set the speed of the player
