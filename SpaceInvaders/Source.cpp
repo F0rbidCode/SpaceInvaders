@@ -5,6 +5,7 @@
 #include <vector>
 #include "Actor.h"
 #include "Barriers.h"
+#include "AABB.cpp"
 
 
 using namespace std;
