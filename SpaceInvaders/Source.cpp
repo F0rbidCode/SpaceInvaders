@@ -1214,7 +1214,7 @@ void GameWin(int scrap, bool &game)
 		BeginDrawing();
 
 		ClearBackground(BLACK);
-		string message = "The alien ships reach you and you discuss tearms of a treaty. \n They offer to work with you to better the human race. \n They also bring you cake.";
+		string message = "The alien ships reach you and you discuss the terms of a treaty. \n They offer to work with you to better the human race. \n They also bring you cake.";
 
 		DrawText(TextFormat("Scrap: %05i", scrap), (GetScreenWidth() / 2) - 50, 10, 20, WHITE);
 		DrawText(message.c_str(), (GetScreenWidth() / 2) - (MeasureText(message.c_str(), 50) / 2), GetScreenHeight() / 2, 50, WHITE);
